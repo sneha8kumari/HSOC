@@ -1,0 +1,20 @@
+id: S2
+name: "SSH brute force"
+description: "SSH brute force targeting authentication server with multiple failed attempts"
+targets:
+  - host: auth-srv-02
+    ip: 192.168.56.21
+techniques:
+  - T1110.001
+tactic: credential_access
+steps:
+  - step: 1
+    type: auth
+    description: "15 consecutive failed SSH logins for user root from single external IP"
+    src_ip: "203.0.113.12"
+    host: auth-srv-02
+    user: root
+    attempts: 15
+    outcome: failure
+    duration_seconds: 45
+    label: ssh_bruteforce

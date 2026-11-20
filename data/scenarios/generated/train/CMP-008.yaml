@@ -1,0 +1,99 @@
+id: CMP-008
+name: Malicious-Insider Multi-Stage Campaign CMP-008
+description: 'Multi-stage operation by Malicious-Insider targeting backup-vault. Stages
+  follow ATT&CK progression: initial_access -> persistence -> privilege_escalation
+  -> credential_access -> initial_access.'
+actor: Malicious-Insider
+targets:
+- host: backup-vault
+  ip: 192.168.56.50
+techniques:
+- T1078
+- T1053.003
+- T1548.003
+- T1110.003
+- T1190
+tactic: kill_chain
+tactic_trajectory:
+- initial_access
+- persistence
+- privilege_escalation
+- credential_access
+- initial_access
+steps:
+- step: 1
+  type: auth
+  description: 'INITIAL_ACCESS: Logon via compromised credentials from unusual external
+    address'
+  src_ip: 203.0.113.20
+  duration_seconds: 9
+  label: CMP-008_initial_access_valid_login
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 2
+  type: auth
+  description: 'PERSISTENCE: Cron job modification for persistent execution callback'
+  src_ip: 203.0.113.20
+  duration_seconds: 20
+  label: CMP-008_persistence_cron_task
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+  command: crontab -l | { cat; echo '*/30 * * * * /tmp/.svc'; } | crontab -
+- step: 3
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-008_benign_health_check
+  host: backup-vault
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 4
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Abuse of NOPASSWD sudo privileges to spawn privileged
+    bash shell'
+  src_ip: 203.0.113.20
+  duration_seconds: 7
+  label: CMP-008_priv_esc_sudo_abuse
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+  command: sudo /bin/bash
+- step: 5
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.20
+  duration_seconds: 55
+  label: CMP-008_cred_access_pass_spray
+  host: backup-vault
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 6
+  type: web
+  description: 'INITIAL_ACCESS: Command injection attempt on public web endpoint'
+  src_ip: 203.0.113.20
+  duration_seconds: 23
+  label: CMP-008_initial_access_cve_exploit
+  host: backup-vault
+  paths:
+  - /api/v1/upload
+  - /cgi-bin/test.cgi
+  - /login?redirect=1
+  status_codes:
+  - 500
+  - 200
+  count: 15

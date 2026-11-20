@@ -1,0 +1,57 @@
+id: CMP-026
+name: Malicious-Insider Multi-Stage Campaign CMP-026
+description: 'Multi-stage operation by Malicious-Insider targeting legacy-srv. Stages
+  follow ATT&CK progression: credential_access -> privilege_escalation -> credential_access.'
+actor: Malicious-Insider
+targets:
+- host: legacy-srv
+  ip: 192.168.56.30
+techniques:
+- T1110.003
+- T1548.003
+- T1110.001
+tactic: kill_chain
+tactic_trajectory:
+- credential_access
+- privilege_escalation
+- credential_access
+steps:
+- step: 1
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.43
+  duration_seconds: 60
+  label: CMP-026_cred_access_pass_spray
+  host: legacy-srv
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 2
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Abuse of NOPASSWD sudo privileges to spawn privileged
+    bash shell'
+  src_ip: 203.0.113.43
+  duration_seconds: 6
+  label: CMP-026_priv_esc_sudo_abuse
+  host: legacy-srv
+  user: admin
+  attempts: 1
+  outcome: success
+  command: sudo /bin/bash
+- step: 3
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Targeted SSH password brute force targeting root
+    and service accounts'
+  src_ip: 203.0.113.43
+  duration_seconds: 50
+  label: CMP-026_cred_access_ssh_bruteforce
+  host: legacy-srv
+  user: root
+  attempts: 16
+  outcome: failure

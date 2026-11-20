@@ -1,0 +1,100 @@
+{
+  "T1046": [
+    "discovery",
+    "reconnaissance",
+    "initial_access",
+    "credential_access",
+    "privilege_escalation",
+    "impact",
+    "lateral_movement"
+  ],
+  "T1110.001": [
+    "credential_access",
+    "initial_access"
+  ],
+  "T1110.003": [
+    "credential_access",
+    "initial_access"
+  ],
+  "T1078": [
+    "defense_evasion",
+    "persistence",
+    "privilege_escalation",
+    "initial_access",
+    "lateral_movement",
+    "impact",
+    "reconnaissance",
+    "credential_access",
+    "exfiltration"
+  ],
+  "T1548.003": [
+    "privilege_escalation",
+    "defense_evasion"
+  ],
+  "T1136.001": [
+    "persistence"
+  ],
+  "T1595.003": [
+    "reconnaissance",
+    "initial_access"
+  ],
+  "T1059.004": [
+    "execution"
+  ],
+  "T1021.004": [
+    "lateral_movement"
+  ],
+  "T1486": [
+    "impact",
+    "persistence",
+    "lateral_movement",
+    "reconnaissance",
+    "exfiltration"
+  ],
+  "T1548": [
+    "privilege_escalation",
+    "defense_evasion",
+    "reconnaissance",
+    "credential_access",
+    "lateral_movement",
+    "persistence"
+  ],
+  "CWE-319": [
+    "credential_access"
+  ],
+  "T1040": [
+    "credential_access"
+  ],
+  "T1110": [
+    "credential_access",
+    "reconnaissance",
+    "initial_access",
+    "privilege_escalation",
+    "persistence",
+    "impact",
+    "lateral_movement"
+  ],
+  "T1595": [
+    "initial_access",
+    "reconnaissance",
+    "discovery"
+  ],
+  "T1190": [
+    "initial_access",
+    "reconnaissance",
+    "discovery"
+  ],
+  "T1136": [
+    "reconnaissance",
+    "credential_access",
+    "privilege_escalation",
+    "persistence",
+    "lateral_movement",
+    "impact",
+    "exfiltration"
+  ],
+  "T1021": [
+    "privilege_escalation",
+    "lateral_movement"
+  ]
+}

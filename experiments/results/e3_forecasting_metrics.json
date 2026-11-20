@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-10-27T06:08:42.122133+00:00",
+  "total_test_transitions": 34,
+  "models": {
+    "no_model_unigram": {
+      "top1_accuracy": 23.53,
+      "top3_accuracy": 38.24,
+      "log_loss": 2.4464,
+      "perplexity": 11.5467
+    },
+    "markov_1st_order": {
+      "top1_accuracy": 26.47,
+      "top3_accuracy": 70.59,
+      "log_loss": 2.0031,
+      "perplexity": 7.412
+    },
+    "markov_2nd_order_backoff": {
+      "top1_accuracy": 20.59,
+      "top3_accuracy": 70.59,
+      "log_loss": 2.0972,
+      "perplexity": 8.1431
+    },
+    "hidden_markov_model": {
+      "top1_accuracy": 5.88,
+      "top3_accuracy": 29.41,
+      "log_loss": 2.6902,
+      "perplexity": 14.7339
+    }
+  }
+}

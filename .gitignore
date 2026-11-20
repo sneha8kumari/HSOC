@@ -1,0 +1,35 @@
+.env
+*.pyc
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
+
+# Data — raw datasets must be placed manually
+data/raw/
+data/processed/
+data/kb/raw/
+data/kb/manual/
+# Database & SQLite WAL files
+data/hsoc.db
+*.db
+*.db-wal
+*.db-shm
+data/models/*.joblib
+data/models/*.json
+
+# Node / dashboard build
+dashboard/node_modules/
+dashboard/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Experiments results (generated, not committed)
+experiments/results/*/metrics.json
+experiments/results/*/plots/

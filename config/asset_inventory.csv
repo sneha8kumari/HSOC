@@ -1,0 +1,6 @@
+host,ip,role,owner,criticality
+db-srv-01,192.168.56.20,database,infra-team,5
+auth-srv-02,192.168.56.21,authentication_server,secops,4
+file-srv-03,192.168.56.22,file_server,infra-team,3
+legacy-srv,192.168.56.30,legacy_services,infra-team,3
+ws-01,192.168.56.40,workstation,helpdesk,2

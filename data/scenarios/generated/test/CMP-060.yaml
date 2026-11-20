@@ -1,0 +1,93 @@
+id: CMP-060
+name: FIN7-Syndicate Multi-Stage Campaign CMP-060
+description: 'Multi-stage operation by FIN7-Syndicate targeting backup-vault. Stages
+  follow ATT&CK progression: reconnaissance -> credential_access -> privilege_escalation
+  -> defense_evasion -> credential_access.'
+actor: FIN7-Syndicate
+targets:
+- host: backup-vault
+  ip: 192.168.56.50
+techniques:
+- T1046
+- T1110.001
+- T1548.003
+- T1562.001
+- T1110.003
+tactic: kill_chain
+tactic_trajectory:
+- reconnaissance
+- credential_access
+- privilege_escalation
+- defense_evasion
+- credential_access
+steps:
+- step: 1
+  type: flow
+  description: 'RECONNAISSANCE: SYN port scan against target services'
+  src_ip: 203.0.113.64
+  duration_seconds: 42
+  label: CMP-060_recon_port_scan
+  dst_ips:
+  - 192.168.56.50
+  dst_ports: 21-1024
+  packets_per_flow: 1
+- step: 2
+  type: flow
+  description: '[Benign Noise] Routine NTP network time synchronization check'
+  src_ip: 192.168.56.40
+  duration_seconds: 5
+  label: CMP-060_benign_ntp_sync
+  dst_ips:
+  - 192.168.56.50
+  dst_ports: '123'
+  packets_per_flow: 1
+- step: 3
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Targeted SSH password brute force targeting root
+    and service accounts'
+  src_ip: 203.0.113.64
+  duration_seconds: 45
+  label: CMP-060_cred_access_ssh_bruteforce
+  host: backup-vault
+  user: root
+  attempts: 16
+  outcome: failure
+- step: 4
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Abuse of NOPASSWD sudo privileges to spawn privileged
+    bash shell'
+  src_ip: 203.0.113.64
+  duration_seconds: 9
+  label: CMP-060_priv_esc_sudo_abuse
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+  command: sudo /bin/bash
+- step: 5
+  type: auth
+  description: 'DEFENSE_EVASION: Stopping host audit daemon and security sensors'
+  src_ip: 203.0.113.64
+  duration_seconds: 7
+  label: CMP-060_defense_evasion_disable_sensor
+  host: backup-vault
+  user: root
+  attempts: 1
+  outcome: success
+  command: systemctl stop auditd wazuh-agent
+- step: 6
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.64
+  duration_seconds: 67
+  label: CMP-060_cred_access_pass_spray
+  host: backup-vault
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure

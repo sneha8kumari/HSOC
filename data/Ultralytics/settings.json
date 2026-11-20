@@ -1,0 +1,21 @@
+{
+  "settings_version": "0.0.6",
+  "datasets_dir": "C:\\Users\\Utkarsh Dubey\\.gemini\\antigravity\\HSOC\\datasets",
+  "weights_dir": "weights",
+  "runs_dir": "runs",
+  "uuid": "1109b4e148750e9fd286ae7ce152fe6a3b6292928f967de6bba2c6e60ea00522",
+  "sync": true,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "hub": true,
+  "mlflow": true,
+  "neptune": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": true
+}

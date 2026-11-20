@@ -1,0 +1,15 @@
+{
+  "simulation_steps": 100,
+  "initial_top1_accuracy": 0.5556,
+  "final_top1_accuracy": 0.6667,
+  "accuracy_gain": 0.1111,
+  "p_true_initial": 0.0909,
+  "p_true_final": 0.8119,
+  "p_true_gain": 0.721,
+  "p_rejected_initial": 0.4091,
+  "p_rejected_final": 0.0164,
+  "p_rejected_decay": 0.3927,
+  "final_kl_divergence": 1.1253,
+  "plot_file": "experiments\\results\\markov_feedback_eval.png",
+  "model_registry_version": 4
+}

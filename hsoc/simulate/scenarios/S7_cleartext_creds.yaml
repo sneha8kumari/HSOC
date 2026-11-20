@@ -1,0 +1,19 @@
+id: S7
+name: "Cleartext protocol on critical asset"
+description: "Plaintext FTP / Telnet session initiating to high-criticality database server"
+targets:
+  - host: db-srv-01
+    ip: 192.168.56.20
+techniques:
+  - CWE-319
+tactic: initial_access
+steps:
+  - step: 1
+    type: flow
+    description: "Insecure Telnet connection on port 23 to critical asset"
+    src_ip: "{{attacker_ip}}"
+    dst_ip: "192.168.56.20"
+    dst_port: 23
+    duration_seconds: 15
+    packets_per_flow: 10
+    label: cleartext_telnet

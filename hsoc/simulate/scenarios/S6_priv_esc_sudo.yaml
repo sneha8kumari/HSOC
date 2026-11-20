@@ -1,0 +1,21 @@
+id: S6
+name: "Unauthorized sudo / local group modification"
+description: "Non-privileged or unapproved user attempting unauthorized sudo execution"
+targets:
+  - host: db-srv-01
+    ip: 192.168.56.20
+techniques:
+  - T1548.003
+  - T1098
+tactic: privilege_escalation
+steps:
+  - step: 1
+    type: auth
+    description: "User alice executes sudo usermod -aG sudo alice"
+    src_ip: "192.168.56.40"
+    host: db-srv-01
+    user: alice
+    command: "/usr/sbin/usermod -aG sudo alice"
+    outcome: success
+    duration_seconds: 5
+    label: sudo_priv_esc

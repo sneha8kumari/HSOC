@@ -1,0 +1,136 @@
+id: CMP-057
+name: Malicious-Insider Multi-Stage Campaign CMP-057
+description: 'Multi-stage operation by Malicious-Insider targeting backup-vault. Stages
+  follow ATT&CK progression: reconnaissance -> credential_access -> discovery -> lateral_movement
+  -> execution -> credential_access.'
+actor: Malicious-Insider
+targets:
+- host: backup-vault
+  ip: 192.168.56.50
+techniques:
+- T1046
+- T1110.003
+- T1018
+- T1021.004
+- T1059.001
+tactic: kill_chain
+tactic_trajectory:
+- reconnaissance
+- credential_access
+- discovery
+- lateral_movement
+- execution
+- credential_access
+steps:
+- step: 1
+  type: web
+  description: '[Benign Noise] Internal Prometheus metrics scraping query'
+  src_ip: 192.168.56.42
+  duration_seconds: 5
+  label: CMP-057_benign_metrics_scrape
+  host: backup-vault
+  paths:
+  - /metrics
+  - /healthz
+  status_codes:
+  - 200
+  count: 4
+- step: 2
+  type: flow
+  description: 'RECONNAISSANCE: SYN port scan against target services'
+  src_ip: 203.0.113.77
+  duration_seconds: 43
+  label: CMP-057_recon_port_scan
+  dst_ips:
+  - 192.168.56.50
+  dst_ports: 21-1024
+  packets_per_flow: 1
+- step: 3
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.77
+  duration_seconds: 67
+  label: CMP-057_cred_access_pass_spray
+  host: backup-vault
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 4
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-057_benign_health_check
+  host: backup-vault
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 5
+  type: flow
+  description: 'DISCOVERY: Internal subnet sweep to discover adjacent database and
+    storage servers'
+  src_ip: 203.0.113.77
+  duration_seconds: 27
+  label: CMP-057_discovery_internal_sweep
+  dst_ips:
+  - 192.168.56.50
+  dst_ports: 22,80,443,3306,5432
+  packets_per_flow: 1
+- step: 6
+  type: auth
+  description: 'LATERAL_MOVEMENT: Pivoting via harvested SSH credentials to internal
+    database vault'
+  src_ip: 203.0.113.77
+  duration_seconds: 25
+  label: CMP-057_lateral_movement_ssh_pivot
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 7
+  type: auth
+  description: 'EXECUTION: Execution of encoded staged payloads'
+  src_ip: 203.0.113.77
+  duration_seconds: 15
+  label: CMP-057_execution_scripting
+  host: backup-vault
+  user: service_acc
+  attempts: 1
+  outcome: success
+  command: python3 -c 'import os; os.system("whoami")'
+- step: 8
+  type: web
+  description: '[Benign Noise] Internal Prometheus metrics scraping query'
+  src_ip: 192.168.56.42
+  duration_seconds: 5
+  label: CMP-057_benign_metrics_scrape
+  host: backup-vault
+  paths:
+  - /metrics
+  - /healthz
+  status_codes:
+  - 200
+  count: 4
+- step: 9
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.77
+  duration_seconds: 61
+  label: CMP-057_cred_access_pass_spray
+  host: backup-vault
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure

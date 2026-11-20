@@ -1,0 +1,112 @@
+id: CMP-024
+name: APT28-Emulation Multi-Stage Campaign CMP-024
+description: 'Multi-stage operation by APT28-Emulation targeting web-srv-01. Stages
+  follow ATT&CK progression: initial_access -> credential_access -> collection ->
+  command_and_control -> lateral_movement.'
+actor: APT28-Emulation
+targets:
+- host: web-srv-01
+  ip: 192.168.56.15
+techniques:
+- T1078
+- T1110.003
+- T1560
+- T1071.001
+- T1021.002
+tactic: kill_chain
+tactic_trajectory:
+- initial_access
+- credential_access
+- collection
+- command_and_control
+- lateral_movement
+steps:
+- step: 1
+  type: web
+  description: '[Benign Noise] Internal Prometheus metrics scraping query'
+  src_ip: 192.168.56.42
+  duration_seconds: 5
+  label: CMP-024_benign_metrics_scrape
+  host: web-srv-01
+  paths:
+  - /metrics
+  - /healthz
+  status_codes:
+  - 200
+  count: 4
+- step: 2
+  type: auth
+  description: 'INITIAL_ACCESS: Logon via compromised credentials from unusual external
+    address'
+  src_ip: 203.0.113.22
+  duration_seconds: 16
+  label: CMP-024_initial_access_valid_login
+  host: web-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 3
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.22
+  duration_seconds: 55
+  label: CMP-024_cred_access_pass_spray
+  host: web-srv-01
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 4
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-024_benign_health_check
+  host: web-srv-01
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 5
+  type: auth
+  description: 'COLLECTION: Compressing customer databases and private keys into encrypted
+    archive'
+  src_ip: 203.0.113.22
+  duration_seconds: 20
+  label: CMP-024_collection_archive_data
+  host: web-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+  command: tar -czf /tmp/.dump.tar.gz /var/lib/mysql /etc/ssl/private
+- step: 6
+  type: web
+  description: 'COMMAND_AND_CONTROL: Periodic HTTPS beaconing to remote adversary
+    C2 server'
+  src_ip: 203.0.113.22
+  duration_seconds: 31
+  label: CMP-024_c2_web_beaconing
+  host: web-srv-01
+  paths:
+  - /api/v2/telemetry/sync
+  - /beacon/ping
+  - /data/heartbeat
+  status_codes:
+  - 200
+  count: 10
+- step: 7
+  type: flow
+  description: 'LATERAL_MOVEMENT: SMB communication connecting to internal backup
+    share'
+  src_ip: 203.0.113.22
+  duration_seconds: 29
+  label: CMP-024_lateral_movement_smb_share
+  dst_ips:
+  - 192.168.56.15
+  dst_ports: '445'
+  packets_per_flow: 1

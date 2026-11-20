@@ -1,0 +1,91 @@
+id: CMP-018
+name: Lazarus-Campaign Multi-Stage Campaign CMP-018
+description: 'Multi-stage operation by Lazarus-Campaign targeting db-srv-01. Stages
+  follow ATT&CK progression: credential_access -> discovery -> lateral_movement ->
+  discovery -> privilege_escalation.'
+actor: Lazarus-Campaign
+targets:
+- host: db-srv-01
+  ip: 192.168.56.20
+techniques:
+- T1110.001
+- T1018
+- T1021.004
+- T1548.003
+tactic: kill_chain
+tactic_trajectory:
+- credential_access
+- discovery
+- lateral_movement
+- discovery
+- privilege_escalation
+steps:
+- step: 1
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Targeted SSH password brute force targeting root
+    and service accounts'
+  src_ip: 203.0.113.15
+  duration_seconds: 44
+  label: CMP-018_cred_access_ssh_bruteforce
+  host: db-srv-01
+  user: root
+  attempts: 16
+  outcome: failure
+- step: 2
+  type: web
+  description: '[Benign Noise] Internal Prometheus metrics scraping query'
+  src_ip: 192.168.56.42
+  duration_seconds: 5
+  label: CMP-018_benign_metrics_scrape
+  host: db-srv-01
+  paths:
+  - /metrics
+  - /healthz
+  status_codes:
+  - 200
+  count: 4
+- step: 3
+  type: flow
+  description: 'DISCOVERY: Internal subnet sweep to discover adjacent database and
+    storage servers'
+  src_ip: 203.0.113.15
+  duration_seconds: 30
+  label: CMP-018_discovery_internal_sweep
+  dst_ips:
+  - 192.168.56.20
+  dst_ports: 22,80,443,3306,5432
+  packets_per_flow: 1
+- step: 4
+  type: auth
+  description: 'LATERAL_MOVEMENT: Pivoting via harvested SSH credentials to internal
+    database vault'
+  src_ip: 203.0.113.15
+  duration_seconds: 11
+  label: CMP-018_lateral_movement_ssh_pivot
+  host: db-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 5
+  type: flow
+  description: 'DISCOVERY: Internal subnet sweep to discover adjacent database and
+    storage servers'
+  src_ip: 203.0.113.15
+  duration_seconds: 29
+  label: CMP-018_discovery_internal_sweep
+  dst_ips:
+  - 192.168.56.20
+  dst_ports: 22,80,443,3306,5432
+  packets_per_flow: 1
+- step: 6
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Abuse of NOPASSWD sudo privileges to spawn privileged
+    bash shell'
+  src_ip: 203.0.113.15
+  duration_seconds: 14
+  label: CMP-018_priv_esc_sudo_abuse
+  host: db-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+  command: sudo /bin/bash

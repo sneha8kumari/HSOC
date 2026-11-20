@@ -1,0 +1,84 @@
+id: CMP-009
+name: FIN7-Syndicate Multi-Stage Campaign CMP-009
+description: 'Multi-stage operation by FIN7-Syndicate targeting backup-vault. Stages
+  follow ATT&CK progression: reconnaissance -> execution -> persistence -> defense_evasion.'
+actor: FIN7-Syndicate
+targets:
+- host: backup-vault
+  ip: 192.168.56.50
+techniques:
+- T1595.003
+- T1059.001
+- T1053.003
+- T1562.001
+tactic: kill_chain
+tactic_trajectory:
+- reconnaissance
+- execution
+- persistence
+- defense_evasion
+steps:
+- step: 1
+  type: web
+  description: 'RECONNAISSANCE: Automated scan probing for admin panels, env files
+    and git repos'
+  src_ip: 203.0.113.60
+  duration_seconds: 51
+  label: CMP-009_recon_web_scan
+  host: backup-vault
+  paths:
+  - /admin
+  - /.env
+  - /.git/config
+  - /api/v1/auth
+  - /debug
+  - /phpmyadmin
+  status_codes:
+  - 401
+  - 403
+  - 404
+  count: 30
+- step: 2
+  type: auth
+  description: 'EXECUTION: Execution of encoded staged payloads'
+  src_ip: 203.0.113.60
+  duration_seconds: 15
+  label: CMP-009_execution_scripting
+  host: backup-vault
+  user: service_acc
+  attempts: 1
+  outcome: success
+  command: python3 -c 'import os; os.system("whoami")'
+- step: 3
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-009_benign_health_check
+  host: backup-vault
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 4
+  type: auth
+  description: 'PERSISTENCE: Cron job modification for persistent execution callback'
+  src_ip: 203.0.113.60
+  duration_seconds: 15
+  label: CMP-009_persistence_cron_task
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+  command: crontab -l | { cat; echo '*/30 * * * * /tmp/.svc'; } | crontab -
+- step: 5
+  type: auth
+  description: 'DEFENSE_EVASION: Stopping host audit daemon and security sensors'
+  src_ip: 203.0.113.60
+  duration_seconds: 19
+  label: CMP-009_defense_evasion_disable_sensor
+  host: backup-vault
+  user: root
+  attempts: 1
+  outcome: success
+  command: systemctl stop auditd wazuh-agent

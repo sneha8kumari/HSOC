@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-10-25T21:19:28.837310+00:00",
+  "total_campaigns_generated": 60,
+  "splits": {
+    "train_campaigns": 42,
+    "val_campaigns": 9,
+    "test_campaigns": 9
+  },
+  "evaluation_dataset": {
+    "test_transitions_evaluated": 34,
+    "bootstrap_iterations": 1000,
+    "confidence_level": 0.95
+  },
+  "trained_markov_model": {
+    "top1_accuracy": 0.2941,
+    "top1_ci_95": [
+      0.1471,
+      0.4412
+    ],
+    "top3_accuracy": 0.7059,
+    "top3_ci_95": [
+      0.5294,
+      0.8529
+    ],
+    "mean_nll": 1.9761,
+    "perplexity": 7.2143,
+    "perplexity_ci_95": [
+      6.0289,
+      8.759
+    ]
+  },
+  "untrained_prior_baseline": {
+    "top1_accuracy": 0.2941,
+    "top1_ci_95": [
+      0.1471,
+      0.4412
+    ],
+    "top3_accuracy": 0.4412,
+    "top3_ci_95": [
+      0.2941,
+      0.6176
+    ],
+    "perplexity": 11.418
+  },
+  "relative_gain": {
+    "top1_accuracy_lift": 0.0,
+    "top3_accuracy_lift": 0.2647,
+    "perplexity_reduction": 4.2037
+  }
+}

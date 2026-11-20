@@ -1,0 +1,202 @@
+{
+  "timestamp": "2026-10-25T20:57:15.661838+00:00",
+  "total_scripted_questions": 10,
+  "passed_questions": 10,
+  "qa_accuracy_pct": 100.0,
+  "what_if_simulation": {
+    "forced_state": "attacker obtains domain admin privileges",
+    "baseline_severity": "high",
+    "projected_severity": "critical",
+    "baseline_risk": 78,
+    "projected_risk": 82,
+    "narrative": "If the attacker advances to state 'privilege_escalation', the Markov transition model predicts next likely attacker tactics: defense_evasion (14.3%), discovery (7.1%), collection (7.1%). Risk score shifts from 78 to 82 (Severity Band: CRITICAL). Immediate containment playbook [KB-MITRE-754bcfbc354a] requires isolating network segment and revoking domain credentials."
+  },
+  "counterfactual_analysis": {
+    "current_severity": "high",
+    "target_lower_severity": "medium",
+    "asset_criticality_threshold": 2,
+    "verbalized_explanation": "Severity would drop from HIGH to MEDIUM if asset criticality were <= 2 (e.g. non-production tier instead of tier-1 server auth-srv-02), reducing computed risk score from 74 to 58. Calculated from alert [ALT-BENCH-01]."
+  },
+  "supported_export_formats": [
+    "executive_summary",
+    "technical_report",
+    "jira",
+    "servicenow"
+  ],
+  "questions_evaluation": [
+    {
+      "id": "Q1",
+      "question": "Why is this incident classified as High severity?",
+      "intent": "explain_severity",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [],
+      "answer_preview": "Incident INC-BENCH-01 is classified as HIGH severity with a risk score of 78/100. This is computed deterministically fro...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q2",
+      "question": "What happens if the attacker gets sudo?",
+      "intent": "what_if_query",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [
+        "KB-MITRE-754bcfbc354a",
+        "KB-MITRE-500c341d070f",
+        "KB-PLAYBOOK-15b968f0ce24"
+      ],
+      "answer_preview": "If the attacker successfully achieves 'privilege_escalation' (e.g. obtaining sudo/root credentials): If the attacker adv...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q3",
+      "question": "Show evidence for step 1 of remediation.",
+      "intent": "step_evidence",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [
+        "KB-PLAYBOOK-FIREWALL"
+      ],
+      "answer_preview": "Evidence for Remediation Step 1 ('Isolate compromised host auth-srv-02 at edge firewall.'): This step is authorized unde...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q4",
+      "question": "Show evidence for step 2 of remediation.",
+      "intent": "step_evidence",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [
+        "KB-PLAYBOOK-IAM"
+      ],
+      "answer_preview": "Evidence for Remediation Step 2 ('Revoke active session tokens and force password reset for user root.'): This step is a...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q5",
+      "question": "What entities and hostnames are compromised in this incident?",
+      "intent": "entities_summary",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [],
+      "answer_preview": "The entities identified in incident INC-BENCH-01 are: auth-srv-02, 192.168.1.55. Activity was detected across 1 alerts, ...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q6",
+      "question": "What alerts are associated with this incident?",
+      "intent": "list_alerts",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [],
+      "answer_preview": "Incident INC-BENCH-01 correlates 1 alerts: [ALT-BENCH-01] (Technique: T1110.001, Conf: 0.92). Telemetry evidence is capt...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q7",
+      "question": "What techniques did the attacker use?",
+      "intent": "attack_techniques",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [],
+      "answer_preview": "The attacker employed MITRE ATT&CK techniques T1110.001, T1078 covering tactics 'credential_access, privilege_escalation...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q8",
+      "question": "What are the recommended containment steps?",
+      "intent": "containment_recommendations",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [],
+      "cited_chunk_ids": [
+        "KB-PLAYBOOK-FIREWALL",
+        "KB-PLAYBOOK-IAM",
+        "KB-PLAYBOOK-SIEM"
+      ],
+      "answer_preview": "Recommended containment steps for incident INC-BENCH-01 based on alert [ALT-BENCH-01]: Step 1: Isolate compromised host ...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q9",
+      "question": "What evidence supports the brute force alert?",
+      "intent": "list_alerts",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [],
+      "answer_preview": "Incident INC-BENCH-01 correlates 1 alerts: [ALT-BENCH-01] (Technique: T1110.001, Conf: 0.92). Telemetry evidence is capt...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    },
+    {
+      "id": "Q10",
+      "question": "What happens if the attacker pivots to lateral movement?",
+      "intent": "what_if_query",
+      "cited_alert_ids": [
+        "ALT-BENCH-01"
+      ],
+      "cited_event_ids": [
+        "EVT-BENCH-01"
+      ],
+      "cited_chunk_ids": [
+        "KB-MITRE-a0d6115ad944",
+        "KB-DELOITTE-9839503a3821",
+        "KB-NIST-73ddd4cbeba1"
+      ],
+      "answer_preview": "If the attacker successfully achieves 'lateral_movement' (e.g. obtaining sudo/root credentials): If the attacker advance...",
+      "citation_verified": true,
+      "keywords_verified": true,
+      "passed": true
+    }
+  ]
+}

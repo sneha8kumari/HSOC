@@ -1,0 +1,19 @@
+id: S1
+name: "Port scan"
+description: "TCP port scan as CICFlowMeter flow rows"
+targets:
+  - host: db-srv-01
+    ip: 192.168.56.20
+techniques:
+  - T1046
+tactic: reconnaissance
+steps:
+  - step: 1
+    type: flow
+    description: "SYN scan across 25+ distinct destination ports"
+    src_ip: "203.0.113.11"
+    dst_ips: ["192.168.56.20"]
+    dst_ports: "1-1024"
+    duration_seconds: 30
+    packets_per_flow: 1
+    label: scan

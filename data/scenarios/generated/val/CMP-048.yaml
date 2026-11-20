@@ -1,0 +1,56 @@
+id: CMP-048
+name: FIN7-Syndicate Multi-Stage Campaign CMP-048
+description: 'Multi-stage operation by FIN7-Syndicate targeting web-srv-01. Stages
+  follow ATT&CK progression: initial_access -> persistence -> defense_evasion.'
+actor: FIN7-Syndicate
+targets:
+- host: web-srv-01
+  ip: 192.168.56.15
+techniques:
+- T1190
+- T1136.001
+- T1562.001
+tactic: kill_chain
+tactic_trajectory:
+- initial_access
+- persistence
+- defense_evasion
+steps:
+- step: 1
+  type: web
+  description: 'INITIAL_ACCESS: Command injection attempt on public web endpoint'
+  src_ip: 203.0.113.55
+  duration_seconds: 28
+  label: CMP-048_initial_access_cve_exploit
+  host: web-srv-01
+  paths:
+  - /api/v1/upload
+  - /cgi-bin/test.cgi
+  - /login?redirect=1
+  status_codes:
+  - 500
+  - 200
+  count: 15
+- step: 2
+  type: auth
+  description: 'PERSISTENCE: Backdoor persistence via creation of unauthorized local
+    user'
+  src_ip: 203.0.113.55
+  duration_seconds: 14
+  label: CMP-048_persistence_account_creation
+  host: web-srv-01
+  user: root
+  attempts: 1
+  outcome: success
+  command: useradd -m -s /bin/bash sys_backup_svc
+- step: 3
+  type: auth
+  description: 'DEFENSE_EVASION: Stopping host audit daemon and security sensors'
+  src_ip: 203.0.113.55
+  duration_seconds: 16
+  label: CMP-048_defense_evasion_disable_sensor
+  host: web-srv-01
+  user: root
+  attempts: 1
+  outcome: success
+  command: systemctl stop auditd wazuh-agent

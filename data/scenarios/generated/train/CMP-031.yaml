@@ -1,0 +1,71 @@
+id: CMP-031
+name: Lazarus-Campaign Multi-Stage Campaign CMP-031
+description: 'Multi-stage operation by Lazarus-Campaign targeting backup-vault. Stages
+  follow ATT&CK progression: credential_access -> lateral_movement -> credential_access.'
+actor: Lazarus-Campaign
+targets:
+- host: backup-vault
+  ip: 192.168.56.50
+techniques:
+- T1110.003
+- T1021.004
+tactic: kill_chain
+tactic_trajectory:
+- credential_access
+- lateral_movement
+- credential_access
+steps:
+- step: 1
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-031_benign_health_check
+  host: backup-vault
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 2
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.48
+  duration_seconds: 58
+  label: CMP-031_cred_access_pass_spray
+  host: backup-vault
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 3
+  type: auth
+  description: 'LATERAL_MOVEMENT: Pivoting via harvested SSH credentials to internal
+    database vault'
+  src_ip: 203.0.113.48
+  duration_seconds: 23
+  label: CMP-031_lateral_movement_ssh_pivot
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 4
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.48
+  duration_seconds: 68
+  label: CMP-031_cred_access_pass_spray
+  host: backup-vault
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure

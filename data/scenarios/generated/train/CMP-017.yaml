@@ -1,0 +1,55 @@
+id: CMP-017
+name: FIN7-Syndicate Multi-Stage Campaign CMP-017
+description: 'Multi-stage operation by FIN7-Syndicate targeting db-srv-01. Stages
+  follow ATT&CK progression: credential_access -> initial_access -> execution.'
+actor: FIN7-Syndicate
+targets:
+- host: db-srv-01
+  ip: 192.168.56.20
+techniques:
+- T1110.001
+- T1190
+- T1059.004
+tactic: kill_chain
+tactic_trajectory:
+- credential_access
+- initial_access
+- execution
+steps:
+- step: 1
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Targeted SSH password brute force targeting root
+    and service accounts'
+  src_ip: 203.0.113.48
+  duration_seconds: 55
+  label: CMP-017_cred_access_ssh_bruteforce
+  host: db-srv-01
+  user: root
+  attempts: 16
+  outcome: failure
+- step: 2
+  type: web
+  description: 'INITIAL_ACCESS: Command injection attempt on public web endpoint'
+  src_ip: 203.0.113.48
+  duration_seconds: 25
+  label: CMP-017_initial_access_cve_exploit
+  host: db-srv-01
+  paths:
+  - /api/v1/upload
+  - /cgi-bin/test.cgi
+  - /login?redirect=1
+  status_codes:
+  - 500
+  - 200
+  count: 15
+- step: 3
+  type: auth
+  description: 'EXECUTION: Interactive command execution via spawn shell'
+  src_ip: 203.0.113.48
+  duration_seconds: 13
+  label: CMP-017_execution_unix_shell
+  host: db-srv-01
+  user: root
+  attempts: 1
+  outcome: success
+  command: /bin/bash -c 'id && uname -a && cat /etc/passwd'

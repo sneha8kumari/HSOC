@@ -1,0 +1,124 @@
+{
+  "timestamp": "2026-10-27T06:08:39.829562+00:00",
+  "total_events_evaluated": 1395,
+  "default_threshold": 0.5,
+  "main_comparison": {
+    "rules_only": {
+      "mode": "rules_only",
+      "threshold": 0.5,
+      "bonus": 0.1,
+      "tp": 16,
+      "fp": 231,
+      "fn": 7,
+      "total_alerts": 247,
+      "precision": 0.0648,
+      "recall": 0.6957,
+      "f1": 0.1185,
+      "alert_reduction_pct": 82.29
+    },
+    "ml_only": {
+      "mode": "ml_only",
+      "threshold": 0.5,
+      "bonus": 0.1,
+      "tp": 16,
+      "fp": 0,
+      "fn": 7,
+      "total_alerts": 16,
+      "precision": 1.0,
+      "recall": 0.6957,
+      "f1": 0.8205,
+      "alert_reduction_pct": 98.85
+    },
+    "fusion": {
+      "mode": "fusion",
+      "threshold": 0.5,
+      "bonus": 0.1,
+      "tp": 16,
+      "fp": 231,
+      "fn": 7,
+      "total_alerts": 247,
+      "precision": 0.0648,
+      "recall": 0.6957,
+      "f1": 0.1185,
+      "alert_reduction_pct": 82.29
+    },
+    "fusion_no_bonus": {
+      "mode": "fusion",
+      "threshold": 0.5,
+      "bonus": 0.0,
+      "tp": 16,
+      "fp": 231,
+      "fn": 7,
+      "total_alerts": 247,
+      "precision": 0.0648,
+      "recall": 0.6957,
+      "f1": 0.1185,
+      "alert_reduction_pct": 82.29
+    }
+  },
+  "threshold_ablation": {
+    "thresholds": [
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9
+    ],
+    "fusion_f1": [
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1119
+    ],
+    "fusion_no_bonus_f1": [
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1119,
+      0.0846
+    ],
+    "rules_only_f1": [
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1185,
+      0.1053,
+      0.0775
+    ],
+    "ml_only_f1": [
+      0.7273,
+      0.8205,
+      0.8205,
+      0.8205,
+      0.8205,
+      0.8,
+      0.7407
+    ],
+    "fusion_alerts": [
+      247,
+      247,
+      247,
+      247,
+      247,
+      247,
+      246
+    ],
+    "rules_alerts": [
+      247,
+      247,
+      247,
+      247,
+      247,
+      245,
+      241
+    ]
+  }
+}

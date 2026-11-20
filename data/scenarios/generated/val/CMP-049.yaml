@@ -1,0 +1,75 @@
+id: CMP-049
+name: APT28-Emulation Multi-Stage Campaign CMP-049
+description: 'Multi-stage operation by APT28-Emulation targeting web-srv-01. Stages
+  follow ATT&CK progression: credential_access -> collection -> command_and_control
+  -> impact.'
+actor: APT28-Emulation
+targets:
+- host: web-srv-01
+  ip: 192.168.56.15
+techniques:
+- T1110.003
+- T1560
+- T1071.001
+- T1485
+tactic: kill_chain
+tactic_trajectory:
+- credential_access
+- collection
+- command_and_control
+- impact
+steps:
+- step: 1
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.66
+  duration_seconds: 62
+  label: CMP-049_cred_access_pass_spray
+  host: web-srv-01
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 2
+  type: auth
+  description: 'COLLECTION: Compressing customer databases and private keys into encrypted
+    archive'
+  src_ip: 203.0.113.66
+  duration_seconds: 35
+  label: CMP-049_collection_archive_data
+  host: web-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+  command: tar -czf /tmp/.dump.tar.gz /var/lib/mysql /etc/ssl/private
+- step: 3
+  type: web
+  description: 'COMMAND_AND_CONTROL: Periodic HTTPS beaconing to remote adversary
+    C2 server'
+  src_ip: 203.0.113.66
+  duration_seconds: 37
+  label: CMP-049_c2_web_beaconing
+  host: web-srv-01
+  paths:
+  - /api/v2/telemetry/sync
+  - /beacon/ping
+  - /data/heartbeat
+  status_codes:
+  - 200
+  count: 10
+- step: 4
+  type: auth
+  description: 'IMPACT: Wiping primary database tables and transaction logs'
+  src_ip: 203.0.113.66
+  duration_seconds: 24
+  label: CMP-049_impact_data_destruction
+  host: web-srv-01
+  user: root
+  attempts: 1
+  outcome: success
+  command: rm -rf /var/lib/mysql/* /var/backups/*

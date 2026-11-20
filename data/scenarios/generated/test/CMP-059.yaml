@@ -1,0 +1,87 @@
+id: CMP-059
+name: Opportunistic-RedTeam Multi-Stage Campaign CMP-059
+description: 'Multi-stage operation by Opportunistic-RedTeam targeting backup-vault.
+  Stages follow ATT&CK progression: credential_access -> initial_access -> privilege_escalation
+  -> discovery.'
+actor: Opportunistic-RedTeam
+targets:
+- host: backup-vault
+  ip: 192.168.56.50
+techniques:
+- T1110.001
+- T1078
+- T1068
+- T1018
+tactic: kill_chain
+tactic_trajectory:
+- credential_access
+- initial_access
+- privilege_escalation
+- discovery
+steps:
+- step: 1
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-059_benign_health_check
+  host: backup-vault
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 2
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Targeted SSH password brute force targeting root
+    and service accounts'
+  src_ip: 203.0.113.37
+  duration_seconds: 50
+  label: CMP-059_cred_access_ssh_bruteforce
+  host: backup-vault
+  user: root
+  attempts: 16
+  outcome: failure
+- step: 3
+  type: flow
+  description: '[Benign Noise] Routine NTP network time synchronization check'
+  src_ip: 192.168.56.40
+  duration_seconds: 5
+  label: CMP-059_benign_ntp_sync
+  dst_ips:
+  - 192.168.56.50
+  dst_ports: '123'
+  packets_per_flow: 1
+- step: 4
+  type: auth
+  description: 'INITIAL_ACCESS: Logon via compromised credentials from unusual external
+    address'
+  src_ip: 203.0.113.37
+  duration_seconds: 19
+  label: CMP-059_initial_access_valid_login
+  host: backup-vault
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 5
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Local privilege escalation via kernel vulnerability
+    exploit'
+  src_ip: 203.0.113.37
+  duration_seconds: 25
+  label: CMP-059_priv_esc_local_exploit
+  host: backup-vault
+  user: guest
+  attempts: 1
+  outcome: success
+  command: ./priv_escalate_cve --target=root
+- step: 6
+  type: flow
+  description: 'DISCOVERY: Internal subnet sweep to discover adjacent database and
+    storage servers'
+  src_ip: 203.0.113.37
+  duration_seconds: 38
+  label: CMP-059_discovery_internal_sweep
+  dst_ips:
+  - 192.168.56.50
+  dst_ports: 22,80,443,3306,5432
+  packets_per_flow: 1

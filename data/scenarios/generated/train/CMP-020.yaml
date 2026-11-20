@@ -1,0 +1,65 @@
+id: CMP-020
+name: Opportunistic-RedTeam Multi-Stage Campaign CMP-020
+description: 'Multi-stage operation by Opportunistic-RedTeam targeting auth-srv-02.
+  Stages follow ATT&CK progression: reconnaissance -> execution -> persistence ->
+  defense_evasion.'
+actor: Opportunistic-RedTeam
+targets:
+- host: auth-srv-02
+  ip: 192.168.56.21
+techniques:
+- T1046
+- T1059.004
+- T1136.001
+- T1070.004
+tactic: kill_chain
+tactic_trajectory:
+- reconnaissance
+- execution
+- persistence
+- defense_evasion
+steps:
+- step: 1
+  type: flow
+  description: 'RECONNAISSANCE: SYN port scan against target services'
+  src_ip: 203.0.113.55
+  duration_seconds: 30
+  label: CMP-020_recon_port_scan
+  dst_ips:
+  - 192.168.56.21
+  dst_ports: 21-1024
+  packets_per_flow: 1
+- step: 2
+  type: auth
+  description: 'EXECUTION: Interactive command execution via spawn shell'
+  src_ip: 203.0.113.55
+  duration_seconds: 13
+  label: CMP-020_execution_unix_shell
+  host: auth-srv-02
+  user: root
+  attempts: 1
+  outcome: success
+  command: /bin/bash -c 'id && uname -a && cat /etc/passwd'
+- step: 3
+  type: auth
+  description: 'PERSISTENCE: Backdoor persistence via creation of unauthorized local
+    user'
+  src_ip: 203.0.113.55
+  duration_seconds: 20
+  label: CMP-020_persistence_account_creation
+  host: auth-srv-02
+  user: root
+  attempts: 1
+  outcome: success
+  command: useradd -m -s /bin/bash sys_backup_svc
+- step: 4
+  type: auth
+  description: 'DEFENSE_EVASION: Purging access logs and bash history to evade detection'
+  src_ip: 203.0.113.55
+  duration_seconds: 7
+  label: CMP-020_defense_evasion_log_wipe
+  host: auth-srv-02
+  user: root
+  attempts: 1
+  outcome: success
+  command: rm -f /var/log/auth.log.old ~/.bash_history

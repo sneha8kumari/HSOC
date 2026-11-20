@@ -1,0 +1,73 @@
+id: CMP-043
+name: FIN7-Syndicate Multi-Stage Campaign CMP-043
+description: 'Multi-stage operation by FIN7-Syndicate targeting legacy-srv. Stages
+  follow ATT&CK progression: initial_access -> credential_access -> discovery.'
+actor: FIN7-Syndicate
+targets:
+- host: legacy-srv
+  ip: 192.168.56.30
+techniques:
+- T1190
+- T1110.003
+- T1018
+tactic: kill_chain
+tactic_trajectory:
+- initial_access
+- credential_access
+- discovery
+steps:
+- step: 1
+  type: web
+  description: 'INITIAL_ACCESS: Command injection attempt on public web endpoint'
+  src_ip: 203.0.113.69
+  duration_seconds: 27
+  label: CMP-043_initial_access_cve_exploit
+  host: legacy-srv
+  paths:
+  - /api/v1/upload
+  - /cgi-bin/test.cgi
+  - /login?redirect=1
+  status_codes:
+  - 500
+  - 200
+  count: 15
+- step: 2
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.69
+  duration_seconds: 68
+  label: CMP-043_cred_access_pass_spray
+  host: legacy-srv
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 3
+  type: web
+  description: '[Benign Noise] Internal Prometheus metrics scraping query'
+  src_ip: 192.168.56.42
+  duration_seconds: 5
+  label: CMP-043_benign_metrics_scrape
+  host: legacy-srv
+  paths:
+  - /metrics
+  - /healthz
+  status_codes:
+  - 200
+  count: 4
+- step: 4
+  type: flow
+  description: 'DISCOVERY: Internal subnet sweep to discover adjacent database and
+    storage servers'
+  src_ip: 203.0.113.69
+  duration_seconds: 40
+  label: CMP-043_discovery_internal_sweep
+  dst_ips:
+  - 192.168.56.30
+  dst_ports: 22,80,443,3306,5432
+  packets_per_flow: 1

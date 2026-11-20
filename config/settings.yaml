@@ -1,0 +1,366 @@
+# H-SOC settings — all thresholds, windows and weights live here.
+# The application reads this file at startup via hsoc/config.py.
+# Never hard-code these values in Python code.
+
+# ── Ingestion ────────────────────────────────────────────────────────────────
+ingest:
+  batch_size: 500            # rows per DB commit
+  quarantine_on_error: true  # malformed records go to quarantine table
+
+# ── Detection — sliding window defaults ──────────────────────────────────────
+detection:
+  # Confidence threshold above which an alert is raised
+  alert_threshold: 0.5
+
+  rules:
+    R-01:
+      id: R-01
+      name: "SSH/Login brute force (single host)"
+      window_seconds: 60
+      min_failures: 10
+      technique: "T1110.001"
+      domain: authentication
+      weight: 0.9
+
+    R-02:
+      id: R-02
+      name: "Password spraying (multiple users)"
+      window_seconds: 300      # 5 min
+      min_distinct_users: 5
+      technique: "T1110.003"
+      domain: authentication
+      weight: 0.85
+
+    R-03:
+      id: R-03
+      name: "Brute force → successful login"
+      success_window_seconds: 600  # 10 min after ≥5 failures
+      min_prior_failures: 5
+      technique: "T1078"
+      domain: authentication
+      weight: 0.95
+
+    R-04:
+      id: R-04
+      name: "Port scan (vertical)"
+      window_seconds: 60
+      min_distinct_dst_ports: 20
+      technique: "T1046"
+      domain: reconnaissance
+      weight: 0.8
+
+    R-05:
+      id: R-05
+      name: "Port scan (horizontal)"
+      window_seconds: 60
+      min_distinct_dst_hosts: 10
+      technique: "T1046"
+      domain: reconnaissance
+      weight: 0.8
+
+    R-06:
+      id: R-06
+      name: "Privileged login outside usual hours / new source"
+      technique: "T1078"
+      domain: authentication
+      weight: 0.6
+
+    R-07:
+      id: R-07
+      name: "Unauthorized sudo / local group modification"
+      technique: "T1548.003"
+      technique_alt: "T1098"
+      domain: authorization
+      weight: 0.9
+
+    R-08:
+      id: R-08
+      name: "Web auth brute force / admin path probing"
+      window_seconds: 120   # 2 min
+      min_401_403: 30
+      suspicious_paths:
+        - "/admin"
+        - "/.git"
+        - "/phpmyadmin"
+        - "/wp-admin"
+        - "/.env"
+        - "/config"
+      technique: "T1595.003"
+      domain: access_control
+      weight: 0.75
+
+    R-09:
+      id: R-09
+      name: "Cleartext / weak protocol"
+      cleartext_ports: [21, 23, 80]   # FTP, Telnet, plain HTTP
+      min_asset_criticality: 3
+      technique: "CWE-319"
+      domain: encryption_config
+      weight: 0.7
+
+    R-10:
+      id: R-10
+      name: "Local account creation / persistence"
+      technique: "T1136.001"
+      domain: authorization
+      weight: 0.85
+
+# ── Fusion ───────────────────────────────────────────────────────────────────
+fusion:
+  # conf = min(1, max(rule_conf, ml_score) + bonus)
+  dual_signal_bonus: 0.1
+  dual_signal_threshold: 0.5   # both signals must exceed this for the bonus
+
+# ── Correlation ───────────────────────────────────────────────────────────────
+correlation:
+  window_minutes: 30
+  # Entity values to ignore when building incident graphs (e.g. monitoring IPs)
+  ignore_entities:
+    - "127.0.0.1"
+    - "::1"
+
+# ── Severity scoring ─────────────────────────────────────────────────────────
+# ── Asset configuration ──────────────────────────────────────────────────────
+assets:
+  default_criticality: 1       # Fallback criticality for unknown assets (never returns 0)
+
+severity:
+  default_criticality: 1       # Fallback criticality for unknown assets (never returns 0)
+  # Technique weights by tactic
+  tactic_weights:
+    reconnaissance: 2
+    discovery: 2
+    credential_access: 3
+    initial_access: 3
+    privilege_escalation: 4
+    lateral_movement: 5
+    exfiltration: 5
+    impact: 5
+  # risk = round(20 * (0.4*T + 0.4*A + 1.0*C))
+  formula_coeff:
+    technique: 0.4
+    asset: 0.4
+    confidence: 1.0
+    scale: 20
+  bands:
+    low: 0
+    medium: 40
+    high: 60
+    critical: 80
+
+# ── RAG retrieval ────────────────────────────────────────────────────────────
+rag:
+  kb_dir: "data/kb"
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+  cross_encoder_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  top_k_dense: 20
+  top_k_bm25: 20
+  rrf_k: 60
+  top_k_after_rerank: 5
+  min_results_before_fallback: 5  # min domain-filtered hits before falling back
+  min_score: 0.3                  # below this → low_confidence: true
+  markov_expansion: true
+  markov_top_n: 3
+
+# ── Markov predictor ──────────────────────────────────────────────────────────
+predictor:
+  laplace_alpha: 1.0
+  top_n: 3
+  model_dir: "data/models/markov"
+  feedback:
+    accept_weight: 1.0
+    reject_decay: 0.5
+    min_count: 0.05
+    drift_kl_threshold: 0.15
+
+# ── LLM / GenAI ──────────────────────────────────────────────────────────────
+genai:
+  temperature: 0.2
+  max_evidence_lines: 20
+  max_retries: 2
+  self_consistency_samples: 3
+  self_consistency_temperature: 0.2
+  agent_orchestrator: "deterministic"
+  tools:
+    allowed:
+      - "get_events"
+      - "get_graph_neighbors"
+      - "lookup_asset"
+      - "lookup_user"
+      - "predict_markov_trajectory"
+
+  # Incident Copilot, What-If Engine & Export Settings
+  copilot:
+    max_context_alerts: 10
+    max_context_events: 20
+    streaming_chunk_delay: 0.005
+    default_export_template: "jira"
+    supported_export_formats:
+      - "executive_summary"
+      - "technical_report"
+      - "jira"
+      - "servicenow"
+
+  # Action Guardrail Policy (LLM can only recommend; execution requires explicit analyst approval)
+  action_guardrail:
+    enforce_analyst_approval: true
+    disruptive_verbs:
+      - "disable"
+      - "block"
+      - "kill"
+      - "isolate"
+      - "delete"
+      - "shutdown"
+      - "revoke"
+      - "quarantine"
+    allowed_autonomous_verbs:
+      - "log"
+      - "notify"
+      - "document"
+      - "record"
+
+  # Data Egress & Redaction Policy (Per-provider data sanitization rules)
+  data_egress_policy:
+    default_provider: "hosted"
+    providers:
+      hosted:
+        redact_pii: true
+        redact_secrets: true
+        mask_internal_ips: true
+        mask_usernames: true
+      ollama:
+        redact_pii: false
+        redact_secrets: true
+        mask_internal_ips: false
+        mask_usernames: false
+    patterns:
+      secrets:
+        - name: "bearer_token"
+          regex: "Bearer\\s+[A-Za-z0-9_\\-\\.~+/]+=*"
+          replacement: "Bearer [REDACTED_SECRET]"
+        - name: "jwt_token"
+          regex: "eyJ[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*"
+          replacement: "[REDACTED_JWT]"
+        - name: "api_key_assignment"
+          regex: "(?i)(api[_-]?key|secret|password|passwd|token)\\s*[:=]\\s*['\"]?\\S+['\"]?"
+          replacement: "\\1=[REDACTED_SECRET]"
+        - name: "aws_access_key"
+          regex: "(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}"
+          replacement: "[REDACTED_AWS_KEY]"
+        - name: "private_key"
+          regex: "-----BEGIN [A-Z ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z ]*PRIVATE KEY-----"
+          replacement: "[REDACTED_PRIVATE_KEY]"
+      pii:
+        - name: "email"
+          regex: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
+          replacement: "[REDACTED_EMAIL]"
+        - name: "credit_card"
+          regex: "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13})\\b"
+          replacement: "[REDACTED_CC]"
+        - name: "ssn"
+          regex: "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+          replacement: "[REDACTED_SSN]"
+      network:
+        - name: "rfc1918_10"
+          regex: "\\b10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b"
+          replacement: "10.x.x.x"
+        - name: "rfc1918_172"
+          regex: "\\b172\\.(?:1[6-9]|2[0-9]|3[01])\\.\\d{1,3}\\.\\d{1,3}\\b"
+          replacement: "172.16.x.x"
+        - name: "rfc1918_192"
+          regex: "\\b192\\.168\\.\\d{1,3}\\.\\d{1,3}\\b"
+          replacement: "192.168.x.x"
+
+# ── Auth model (Isolation Forest) ─────────────────────────────────────────────
+auth_model:
+  feature_window_src_minutes: 5
+  feature_window_user_hours: 1
+  contamination: 0.05
+
+# ── Simulation & LLM Scenario Planner ────────────────────────────────────────
+simulation:
+  llm_planner:
+    num_campaigns: 60
+    train_split: 0.70
+    val_split: 0.15
+    test_split: 0.15
+    min_stages: 3
+    max_stages: 6
+    noise_confounder_ratio: 0.25
+    output_dir: "data/scenarios/generated"
+    bootstrap_samples: 1000
+    confidence_level: 0.95
+
+
+# -- Real-Time Streaming Pipeline (Additive) ----------------------------------
+streaming:
+  enabled: false                   # Master feature flag
+  bus:
+    provider: "asyncio"            # "asyncio" (default) or "redis"
+    redis_url: "redis://localhost:6379/0"
+    max_queue_size: 10000
+    backpressure_policy: "drop_oldest"  # "drop_oldest" or "block"
+
+  syslog:
+    enabled: false
+    host: "127.0.0.1"
+    port: 5514                     # Non-privileged default port
+    protocol: "both"               # "udp", "tcp", or "both"
+    max_connections: 100
+    max_line_length: 8192
+
+  webhook:
+    enabled: false
+    path: "/api/v1/telemetry/ingest"
+    api_key_required: false
+    api_key: ""
+    max_batch_size: 500
+    max_payload_bytes: 1048576      # 1 MB
+    rate_limit_per_minute: 1000
+
+  tailer:
+    enabled: false
+    targets: []
+    offset_store_path: "data/tailer_offsets.json"
+    poll_interval_seconds: 0.5
+
+  detector:
+    enabled: false
+    window_store: "memory"         # "memory" or "redis"
+    max_window_keys: 50000
+    cooldown_seconds: 60           # Suppress duplicate alerts for same entity
+    enable_ml_inference: true
+    ml_latency_budget_ms: 10.0
+
+  correlator:
+    cluster_ttl_minutes: 30        # Matches correlation.window_minutes
+    max_active_clusters: 1000
+    compute_blast_radius: true
+
+  markov:
+    prefetch_enabled: true
+    prefetch_threshold: 0.50       # Configured P(next tactic) threshold
+    prefetch_min_support: 5
+    prefetch_ttl_seconds: 3600
+
+  websocket:
+    enabled: false
+    path: "/ws/feed"
+    heartbeat_interval_seconds: 15
+    token_auth_required: false
+
+# -- SOAR Automated Containment (Additive) -------------------------------------
+soar:
+  enabled: true                    # Default enabled per Phase specification
+  dry_run: true                   # Default dry_run = true (SAFE, simulated actions)
+  kill_switch: false              # Global kill switch to immediately block all containment
+  ttl_minutes: 30                 # Auto-expiration TTL (default 30 min)
+  auto_confidence: 0.90           # Confidence threshold for auto-recommendations
+  max_concurrent_blocks: 50
+  default_ban_ttl_seconds: 1800
+  rate_limit_actions_per_hour: 20
+  protected:
+    criticality_threshold: 4      # Refuse assets with criticality >= 4
+    ips: ["127.0.0.1", "::1", "192.168.56.1", "0.0.0.0", "10.0.0.1"]
+    hostnames: ["localhost", "dc-01", "dc-02", "hsoc-core", "gateway"]
+    users: ["root", "administrator", "system"]

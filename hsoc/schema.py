@@ -1,0 +1,310 @@
+"""
+Pydantic v2 models for the H-SOC common event schema and derived objects.
+
+Every piece of data that flows through the pipeline is typed here.
+Parsers produce ``Event``, detection produces ``Alert``, correlation
+produces ``Incident``, and GenAI produces ``Report``.
+"""
+
+from __future__ import annotations
+
+import uuid
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, Field, field_validator
+
+
+# ---------------------------------------------------------------------------
+# Enumerations
+# ---------------------------------------------------------------------------
+
+
+class SourceType(str, Enum):
+    """Supported raw log / flow source types."""
+
+    linux_auth = "linux_auth"
+    win_security = "win_security"
+    windows_event = "windows_event"
+    windows_network = "windows_network"
+    apache = "apache"
+    flow = "flow"
+    lanl_auth = "lanl_auth"
+    wazuh = "wazuh"
+    wazuh_alert = "wazuh_alert"
+
+
+class Outcome(str, Enum):
+    """Normalised outcome of the logged action."""
+
+    success = "success"
+    failure = "failure"
+    unknown = "unknown"
+
+
+class Severity(str, Enum):
+    """Computed incident severity band."""
+
+    low = "low"
+    medium = "medium"
+    high = "high"
+    critical = "critical"
+
+
+class Domain(str, Enum):
+    """Security domain for an alert or incident."""
+
+    authentication = "authentication"
+    authorization = "authorization"
+    access_control = "access_control"
+    encryption_config = "encryption_config"
+    reconnaissance = "reconnaissance"
+    unknown = "unknown"
+
+
+class IncidentStatus(str, Enum):
+    """Analyst lifecycle state for an incident."""
+
+    open = "open"
+    analyzing = "analyzing"
+    reviewed = "reviewed"
+    closed = "closed"
+
+
+class FeedbackDecision(str, Enum):
+    """Analyst decision on a generated report."""
+
+    accepted = "accepted"
+    edited = "edited"
+    rejected = "rejected"
+
+
+# ---------------------------------------------------------------------------
+# Sub-models
+# ---------------------------------------------------------------------------
+
+
+class AssetContext(BaseModel):
+    """Enrichment data from asset_inventory.csv."""
+
+    criticality: int = Field(default=1, ge=1, le=5, description="Asset criticality 1–5")
+    role: str = Field(default="unknown")
+    owner: str = Field(default="unknown")
+
+
+class UserContext(BaseModel):
+    """Enrichment data from users.csv."""
+
+    privileged: bool = False
+    allowed_sudo: bool = False
+    usual_hours_start: int | None = None
+    usual_hours_end: int | None = None
+
+
+class TimelineItem(BaseModel):
+    """One step in an attack-chain timeline."""
+
+    alert_id: str
+    ts: datetime
+    technique: str | None = None
+    tactic: str | None = None
+    description: str = ""
+    out_of_order: bool = False
+    count: int = 1
+    alert_ids: list[str] = Field(default_factory=list)
+
+
+class RemediationStep(BaseModel):
+    """One recommended remediation action in a report."""
+
+    step: str
+    needs_approval: bool = False
+    source: str = ""  # chunk_id from the knowledge index
+
+
+class AttackMapping(BaseModel):
+    """ATT&CK technique ↔ tactic mapping used in a report."""
+
+    technique_id: str
+    technique_name: str
+    tactic: str
+
+
+class PredictedTactic(BaseModel):
+    """Output of the Markov next-tactic predictor."""
+
+    tactic: str
+    probability: float = Field(ge=0.0, le=1.0)
+
+
+# ---------------------------------------------------------------------------
+# Core pipeline models
+# ---------------------------------------------------------------------------
+
+
+class Event(BaseModel):
+    """
+    Normalised security event — the common schema.
+
+    All parsers must produce instances of this model.  Unknown or invalid
+    records must go to the quarantine table instead.
+    """
+
+    event_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    ts: datetime = Field(description="UTC timestamp (ISO-8601)")
+    source_type: SourceType
+    host: str | None = None
+    src_ip: str | None = None
+    dst_ip: str | None = None
+    dst_port: int | None = Field(default=None, ge=0, le=65535)
+    user: str | None = None
+    action: str = Field(description="Normalised action verb, e.g. ssh_login, flow")
+    outcome: Outcome = Outcome.unknown
+    asset: AssetContext = Field(default_factory=AssetContext)
+    user_ctx: UserContext = Field(default_factory=UserContext)
+    features: dict[str, Any] = Field(
+        default_factory=dict,
+        description="ML feature dict — used for flow events",
+    )
+    label: str | None = Field(
+        default=None,
+        description="Ground-truth label from synthetic generator",
+    )
+    raw: str = Field(description="Original log line, unchanged")
+    repeat_count: int = Field(default=1, ge=1)
+    is_simulated: bool = Field(default=False, description="Whether event was generated by simulation/demo")
+
+    @field_validator("ts", mode="before")
+    @classmethod
+    def _parse_ts(cls, v: Any) -> datetime:
+        """Accept ISO-8601 strings or datetime objects."""
+        if isinstance(v, datetime):
+            return v
+        try:
+            return datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise ValueError(f"Invalid timestamp: {v!r}") from exc
+
+
+class QuarantineRecord(BaseModel):
+    """
+    A log record that could not be parsed or validated.
+
+    These are written to the ``quarantine`` DB table, never silently dropped.
+    """
+
+    record_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    source_type: str | None = None
+    raw: str
+    reason: str
+    parser: str
+
+
+class Alert(BaseModel):
+    """
+    A detection output — one rule / model firing on one or more events.
+    """
+
+    alert_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    ts: datetime
+    rule_ids: list[str] = Field(default_factory=list)
+    model_id: str | None = None
+    ml_score: float | None = None
+    conf: float = Field(ge=0.0, le=1.0)
+    technique: str | None = None
+    tactic: str | None = None
+    domain: Domain = Domain.unknown
+    src_ip: str | None = None
+    dst_host: str | None = None
+    user: str | None = None
+    evidence_event_ids: list[str] = Field(default_factory=list)
+    description: str = ""
+    incident_id: str | None = None
+    is_simulated: bool = Field(default=False, description="Whether alert originated from simulated events")
+
+
+class Incident(BaseModel):
+    """
+    A correlated group of alerts representing a potential attack.
+    """
+
+    incident_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    status: IncidentStatus = IncidentStatus.open
+    alert_ids: list[str] = Field(default_factory=list)
+    entity_keys: list[str] = Field(default_factory=list)  # src_ip|user|dst_host values
+    timeline: list[TimelineItem] = Field(default_factory=list)
+    techniques: list[str] = Field(default_factory=list)
+    tactics: list[str] = Field(default_factory=list)
+    domain: Domain = Domain.unknown
+    secondary_domains: list[Domain] = Field(default_factory=list)
+    severity: Severity = Severity.low
+    risk_score: int = Field(default=0, ge=0)
+    risk_rationale: str = ""
+    out_of_order_stage: bool = False
+    predicted_next: list[PredictedTactic] = Field(default_factory=list)
+    report_id: str | None = None
+    is_simulated: bool = Field(default=False, description="Whether incident originated from simulated events")
+
+
+class Report(BaseModel):
+    """
+    LLM-generated incident report, validated against report_schema.json.
+    """
+
+    report_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    incident_id: str
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_by: str = "llm"  # "llm" | "template"
+    model_name: str = ""
+    prompt_version: str = ""
+    latency_seconds: float = 0.0
+    retries: int = 0
+    valid: bool = False
+    severity: Severity
+    summary: str = ""
+    evidence: list[str] = Field(default_factory=list)
+    attack_mapping: list[AttackMapping] = Field(default_factory=list)
+    domain: Domain = Domain.unknown
+    predicted_next: list[PredictedTactic] = Field(default_factory=list)
+    remediation: list[RemediationStep] = Field(default_factory=list)
+    uncertainty: str = ""
+    chunk_ids_used: list[str] = Field(default_factory=list)
+
+
+class Feedback(BaseModel):
+    """
+    Analyst feedback on a generated report.
+    """
+
+    feedback_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    report_id: str
+    incident_id: str
+    ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    decision: FeedbackDecision
+    edited_report: dict[str, Any] | None = None
+    comment: str = ""
+    approved_steps: list[int] = Field(default_factory=list)
+    declined_steps: list[int] = Field(default_factory=list)
+
+
+class AgentTrace(BaseModel):
+    """
+    Execution trace for an agent step in the orchestrator state machine.
+    """
+
+    trace_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    incident_id: str
+    step_index: int
+    agent_name: str
+    state: str
+    inputs: dict[str, Any] = Field(default_factory=dict)
+    tool_calls: list[dict[str, Any]] = Field(default_factory=list)
+    output_message: str = ""
+    latency_ms: float = 0.0
+    tokens: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+

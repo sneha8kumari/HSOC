@@ -1,0 +1,20 @@
+id: S4
+name: "Persistence via backdoor account"
+description: "Creation of rogue local account on file-srv-03"
+targets:
+  - host: file-srv-03
+    ip: 192.168.56.22
+techniques:
+  - T1136.001
+tactic: persistence
+steps:
+  - step: 1
+    type: auth
+    description: "Sudo useradd execution creating rogue user backdoor_svc"
+    src_ip: "192.168.56.22"
+    host: file-srv-03
+    user: root
+    command: "/usr/sbin/useradd -m -s /bin/bash backdoor_svc"
+    outcome: success
+    duration_seconds: 5
+    label: persistence_account

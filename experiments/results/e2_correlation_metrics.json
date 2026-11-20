@@ -1,0 +1,76 @@
+{
+  "timestamp": "2026-10-27T06:08:41.260203+00:00",
+  "total_alerts": 247,
+  "windows_evaluated": [
+    15,
+    30,
+    60,
+    120
+  ],
+  "with_ignore_list": [
+    {
+      "window": 15,
+      "reduction_pct": 92.71,
+      "purity_pct": 100.0,
+      "incidents": 18
+    },
+    {
+      "window": 30,
+      "reduction_pct": 92.71,
+      "purity_pct": 100.0,
+      "incidents": 18
+    },
+    {
+      "window": 60,
+      "reduction_pct": 92.71,
+      "purity_pct": 100.0,
+      "incidents": 18
+    },
+    {
+      "window": 120,
+      "reduction_pct": 92.71,
+      "purity_pct": 100.0,
+      "incidents": 18
+    }
+  ],
+  "without_ignore_list": [
+    {
+      "window": 15,
+      "reduction_pct": 94.74,
+      "purity_pct": 100.0,
+      "incidents": 13
+    },
+    {
+      "window": 30,
+      "reduction_pct": 94.74,
+      "purity_pct": 100.0,
+      "incidents": 13
+    },
+    {
+      "window": 60,
+      "reduction_pct": 94.74,
+      "purity_pct": 100.0,
+      "incidents": 13
+    },
+    {
+      "window": 120,
+      "reduction_pct": 94.74,
+      "purity_pct": 100.0,
+      "incidents": 13
+    }
+  ],
+  "baseline_summary": {
+    "default_window_30m": {
+      "window": 30,
+      "reduction_pct": 92.71,
+      "purity_pct": 100.0,
+      "incidents": 18
+    },
+    "ablation_no_ignore_30m": {
+      "window": 30,
+      "reduction_pct": 94.74,
+      "purity_pct": 100.0,
+      "incidents": 13
+    }
+  }
+}

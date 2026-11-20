@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-10-27T06:08:43.345159+00:00",
+  "dataset_size": 50,
+  "top_k": 5,
+  "results": {
+    "dense_only": {
+      "recall_at_5": 1.0,
+      "mrr": 0.955,
+      "ndcg_at_5": 0.9472
+    },
+    "bm25_only": {
+      "recall_at_5": 1.0,
+      "mrr": 0.99,
+      "ndcg_at_5": 0.9593
+    },
+    "hybrid_rrf": {
+      "recall_at_5": 1.0,
+      "mrr": 0.97,
+      "ndcg_at_5": 0.9495
+    },
+    "hybrid_rerank": {
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_5": 0.9708
+    }
+  }
+}

@@ -1,0 +1,9 @@
+user,privileged,allowed_sudo,usual_hours_start,usual_hours_end
+root,true,true,0,23
+admin,true,true,8,20
+dbadmin,true,true,7,19
+alice,false,false,8,18
+bob,false,false,9,17
+charlie,false,true,8,18
+svc-backup,false,false,1,4
+www-data,false,false,0,23

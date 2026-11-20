@@ -1,0 +1,86 @@
+id: CMP-016
+name: Opportunistic-RedTeam Multi-Stage Campaign CMP-016
+description: 'Multi-stage operation by Opportunistic-RedTeam targeting web-srv-01.
+  Stages follow ATT&CK progression: reconnaissance -> discovery -> privilege_escalation
+  -> defense_evasion.'
+actor: Opportunistic-RedTeam
+targets:
+- host: web-srv-01
+  ip: 192.168.56.15
+techniques:
+- T1595.003
+- T1018
+- T1068
+- T1562.001
+tactic: kill_chain
+tactic_trajectory:
+- reconnaissance
+- discovery
+- privilege_escalation
+- defense_evasion
+steps:
+- step: 1
+  type: web
+  description: 'RECONNAISSANCE: Automated scan probing for admin panels, env files
+    and git repos'
+  src_ip: 203.0.113.34
+  duration_seconds: 48
+  label: CMP-016_recon_web_scan
+  host: web-srv-01
+  paths:
+  - /admin
+  - /.env
+  - /.git/config
+  - /api/v1/auth
+  - /debug
+  - /phpmyadmin
+  status_codes:
+  - 401
+  - 403
+  - 404
+  count: 30
+- step: 2
+  type: flow
+  description: 'DISCOVERY: Internal subnet sweep to discover adjacent database and
+    storage servers'
+  src_ip: 203.0.113.34
+  duration_seconds: 34
+  label: CMP-016_discovery_internal_sweep
+  dst_ips:
+  - 192.168.56.15
+  dst_ports: 22,80,443,3306,5432
+  packets_per_flow: 1
+- step: 3
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-016_benign_health_check
+  host: web-srv-01
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 4
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Local privilege escalation via kernel vulnerability
+    exploit'
+  src_ip: 203.0.113.34
+  duration_seconds: 17
+  label: CMP-016_priv_esc_local_exploit
+  host: web-srv-01
+  user: guest
+  attempts: 1
+  outcome: success
+  command: ./priv_escalate_cve --target=root
+- step: 5
+  type: auth
+  description: 'DEFENSE_EVASION: Stopping host audit daemon and security sensors'
+  src_ip: 203.0.113.34
+  duration_seconds: 16
+  label: CMP-016_defense_evasion_disable_sensor
+  host: web-srv-01
+  user: root
+  attempts: 1
+  outcome: success
+  command: systemctl stop auditd wazuh-agent

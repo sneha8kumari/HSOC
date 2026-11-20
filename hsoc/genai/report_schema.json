@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "H-SOC Incident Report",
+  "description": "Schema for LLM-generated security incident reports.",
+  "type": "object",
+  "required": [
+    "incident_id",
+    "severity",
+    "summary",
+    "evidence",
+    "attack_mapping",
+    "domain",
+    "predicted_next",
+    "remediation",
+    "uncertainty"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "UUID of the incident being reported."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "summary": {
+      "type": "string",
+      "description": "Concise 2–5 sentence narrative of the incident."
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Key evidence items from the event data.",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "attack_mapping": {
+      "type": "array",
+      "description": "ATT&CK techniques observed in the incident.",
+      "items": {
+        "type": "object",
+        "required": ["technique_id", "technique_name", "tactic"],
+        "additionalProperties": false,
+        "properties": {
+          "technique_id": {
+            "type": "string",
+            "pattern": "^(T\\d{4}(\\.\\d{3})?|CWE-\\d+)$"
+          },
+          "technique_name": { "type": "string" },
+          "tactic": { "type": "string" }
+        }
+      }
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "authentication",
+        "authorization",
+        "access_control",
+        "encryption_config",
+        "reconnaissance",
+        "unknown"
+      ]
+    },
+    "predicted_next": {
+      "type": "array",
+      "description": "Top-3 predicted next ATT&CK tactics.",
+      "items": {
+        "type": "object",
+        "required": ["tactic"],
+        "additionalProperties": false,
+        "properties": {
+          "tactic": { "type": "string" },
+          "p": { "type": "number", "minimum": 0, "maximum": 1 },
+          "probability": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      },
+      "maxItems": 3
+    },
+    "remediation": {
+      "type": "array",
+      "description": "Recommended remediation steps.",
+      "items": {
+        "type": "object",
+        "required": ["step", "needs_approval", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "step": {
+            "type": "string",
+            "description": "Plain-English remediation action."
+          },
+          "needs_approval": {
+            "type": "boolean",
+            "description": "True for disruptive actions (block, isolate, delete, etc.)."
+          },
+          "source": {
+            "type": "string",
+            "description": "chunk_id from the knowledge index that supports this step."
+          }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "string",
+      "description": "Caveats or confidence limitations the analyst should be aware of."
+    }
+  }
+}

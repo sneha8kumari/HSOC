@@ -1,0 +1,109 @@
+id: CMP-041
+name: Malicious-Insider Multi-Stage Campaign CMP-041
+description: 'Multi-stage operation by Malicious-Insider targeting db-srv-01. Stages
+  follow ATT&CK progression: reconnaissance -> initial_access -> execution -> discovery
+  -> lateral_movement -> credential_access.'
+actor: Malicious-Insider
+targets:
+- host: db-srv-01
+  ip: 192.168.56.20
+techniques:
+- T1595.003
+- T1190
+- T1059.004
+- T1018
+- T1021.004
+- T1110.003
+tactic: kill_chain
+tactic_trajectory:
+- reconnaissance
+- initial_access
+- execution
+- discovery
+- lateral_movement
+- credential_access
+steps:
+- step: 1
+  type: web
+  description: 'RECONNAISSANCE: Automated scan probing for admin panels, env files
+    and git repos'
+  src_ip: 203.0.113.20
+  duration_seconds: 49
+  label: CMP-041_recon_web_scan
+  host: db-srv-01
+  paths:
+  - /admin
+  - /.env
+  - /.git/config
+  - /api/v1/auth
+  - /debug
+  - /phpmyadmin
+  status_codes:
+  - 401
+  - 403
+  - 404
+  count: 30
+- step: 2
+  type: web
+  description: 'INITIAL_ACCESS: Command injection attempt on public web endpoint'
+  src_ip: 203.0.113.20
+  duration_seconds: 27
+  label: CMP-041_initial_access_cve_exploit
+  host: db-srv-01
+  paths:
+  - /api/v1/upload
+  - /cgi-bin/test.cgi
+  - /login?redirect=1
+  status_codes:
+  - 500
+  - 200
+  count: 15
+- step: 3
+  type: auth
+  description: 'EXECUTION: Interactive command execution via spawn shell'
+  src_ip: 203.0.113.20
+  duration_seconds: 10
+  label: CMP-041_execution_unix_shell
+  host: db-srv-01
+  user: root
+  attempts: 1
+  outcome: success
+  command: /bin/bash -c 'id && uname -a && cat /etc/passwd'
+- step: 4
+  type: flow
+  description: 'DISCOVERY: Internal subnet sweep to discover adjacent database and
+    storage servers'
+  src_ip: 203.0.113.20
+  duration_seconds: 36
+  label: CMP-041_discovery_internal_sweep
+  dst_ips:
+  - 192.168.56.20
+  dst_ports: 22,80,443,3306,5432
+  packets_per_flow: 1
+- step: 5
+  type: auth
+  description: 'LATERAL_MOVEMENT: Pivoting via harvested SSH credentials to internal
+    database vault'
+  src_ip: 203.0.113.20
+  duration_seconds: 20
+  label: CMP-041_lateral_movement_ssh_pivot
+  host: db-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 6
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.20
+  duration_seconds: 69
+  label: CMP-041_cred_access_pass_spray
+  host: db-srv-01
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure

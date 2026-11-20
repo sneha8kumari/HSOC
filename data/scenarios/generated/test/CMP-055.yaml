@@ -1,0 +1,132 @@
+id: CMP-055
+name: FIN7-Syndicate Multi-Stage Campaign CMP-055
+description: 'Multi-stage operation by FIN7-Syndicate targeting legacy-srv. Stages
+  follow ATT&CK progression: initial_access -> credential_access -> collection ->
+  command_and_control -> exfiltration -> defense_evasion.'
+actor: FIN7-Syndicate
+targets:
+- host: legacy-srv
+  ip: 192.168.56.30
+techniques:
+- T1078
+- T1110.003
+- T1560
+- T1071.001
+- T1048.002
+- T1070.004
+tactic: kill_chain
+tactic_trajectory:
+- initial_access
+- credential_access
+- collection
+- command_and_control
+- exfiltration
+- defense_evasion
+steps:
+- step: 1
+  type: auth
+  description: 'INITIAL_ACCESS: Logon via compromised credentials from unusual external
+    address'
+  src_ip: 203.0.113.12
+  duration_seconds: 19
+  label: CMP-055_initial_access_valid_login
+  host: legacy-srv
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 2
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.12
+  duration_seconds: 62
+  label: CMP-055_cred_access_pass_spray
+  host: legacy-srv
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 3
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-055_benign_health_check
+  host: legacy-srv
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 4
+  type: auth
+  description: 'COLLECTION: Compressing customer databases and private keys into encrypted
+    archive'
+  src_ip: 203.0.113.12
+  duration_seconds: 23
+  label: CMP-055_collection_archive_data
+  host: legacy-srv
+  user: admin
+  attempts: 1
+  outcome: success
+  command: tar -czf /tmp/.dump.tar.gz /var/lib/mysql /etc/ssl/private
+- step: 5
+  type: web
+  description: 'COMMAND_AND_CONTROL: Periodic HTTPS beaconing to remote adversary
+    C2 server'
+  src_ip: 203.0.113.12
+  duration_seconds: 27
+  label: CMP-055_c2_web_beaconing
+  host: legacy-srv
+  paths:
+  - /api/v2/telemetry/sync
+  - /beacon/ping
+  - /data/heartbeat
+  status_codes:
+  - 200
+  count: 10
+- step: 6
+  type: flow
+  description: '[Benign Noise] Routine NTP network time synchronization check'
+  src_ip: 192.168.56.40
+  duration_seconds: 5
+  label: CMP-055_benign_ntp_sync
+  dst_ips:
+  - 192.168.56.30
+  dst_ports: '123'
+  packets_per_flow: 1
+- step: 7
+  type: flow
+  description: 'EXFILTRATION: High-volume encrypted outbound transfer to unauthorized
+    external endpoint'
+  src_ip: 203.0.113.12
+  duration_seconds: 46
+  label: CMP-055_exfiltration_outbound_stream
+  dst_ips:
+  - 192.168.56.30
+  dst_ports: 443,8443
+  packets_per_flow: 1
+- step: 8
+  type: flow
+  description: '[Benign Noise] Routine NTP network time synchronization check'
+  src_ip: 192.168.56.40
+  duration_seconds: 5
+  label: CMP-055_benign_ntp_sync
+  dst_ips:
+  - 192.168.56.30
+  dst_ports: '123'
+  packets_per_flow: 1
+- step: 9
+  type: auth
+  description: 'DEFENSE_EVASION: Purging access logs and bash history to evade detection'
+  src_ip: 203.0.113.12
+  duration_seconds: 9
+  label: CMP-055_defense_evasion_log_wipe
+  host: legacy-srv
+  user: root
+  attempts: 1
+  outcome: success
+  command: rm -f /var/log/auth.log.old ~/.bash_history

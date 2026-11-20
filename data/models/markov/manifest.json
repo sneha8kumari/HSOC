@@ -1,0 +1,342 @@
+{
+  "current_version": 1,
+  "versions": [
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T19:08:15.221559+00:00",
+      "description": "Initial Baseline Markov Model",
+      "kl_divergence": 0.0,
+      "file": "v1.json"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T19:08:16.745445+00:00",
+      "description": "Update from feedback d06211a0-af54-47e4-904f-244c5a3cb4f9 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T19:08:16.768865+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T19:10:54.894250+00:00",
+      "description": "Update from feedback cd154b7d-6cec-4c22-868d-44f578d8d5f8 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T19:10:54.921331+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T19:11:09.923649+00:00",
+      "description": "Update from feedback 376fb4ec-a61d-44fd-a3d7-b3ab9a8b3401 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T19:11:09.960027+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T19:30:26.328254+00:00",
+      "description": "Update from feedback 8d8984f4-6e35-4d42-b190-e7b9446a3d8a (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T19:30:26.370216+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T19:49:10.032181+00:00",
+      "description": "Update from feedback de9c1a90-85f4-4ba7-b234-24862c382fb0 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T19:49:10.067723+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T19:59:50.509186+00:00",
+      "description": "Update from feedback 1f5d4989-79de-4b08-b26c-468810b7c66b (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T19:59:50.543855+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T20:16:34.558595+00:00",
+      "description": "Update from feedback 0f6e1e71-f624-4de0-8ce9-b3b502ea6f1b (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T20:16:34.603984+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T21:00:48.449627+00:00",
+      "description": "Update from feedback ffeb3902-780e-4e19-82ca-e3ae79963b5f (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T21:00:48.500427+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T21:09:21.729312+00:00",
+      "description": "Update from feedback d254dbd0-55fd-4789-b1e4-f38b9d265581 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T21:09:21.762467+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T21:14:16.746230+00:00",
+      "description": "Update from feedback 644435eb-50a0-46ae-9fc7-d135ec83ccc1 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T21:14:16.784477+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T21:21:46.785582+00:00",
+      "description": "Update from feedback aea5895a-4192-4afe-a646-c0f6fbc9d984 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T21:21:46.821273+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-25T22:24:15.936106+00:00",
+      "description": "Update from feedback 86e4dcdc-da4f-41e0-9482-ba0cf48f69c4 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-25T22:24:15.967212+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-26T07:38:48.229680+00:00",
+      "description": "Update from feedback 1c8c4a3a-6acb-476a-b2e8-f57e3aa14e06 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-26T07:38:48.287746+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-26T10:26:15.885443+00:00",
+      "description": "Update from feedback 6662a8b5-6b9b-4ca4-9a21-d7da18e79aa7 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-26T10:26:15.928892+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-26T10:29:14.454725+00:00",
+      "description": "Update from feedback 2c9fb074-ef96-47ac-a300-31e6dff56f6a (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-26T10:29:14.498214+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-26T17:23:47.600977+00:00",
+      "description": "Update from feedback 9ccde0d3-f7ac-46ea-b366-510446b6f449 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-26T17:23:47.632081+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-10-27T06:06:23.605058+00:00",
+      "description": "Update from feedback a101e7eb-095e-44b7-ac6d-a990c5e01d35 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-10-27T06:06:23.681432+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-11-19T06:35:32.211162+00:00",
+      "description": "Update from feedback 8eeb0344-9ab0-49e2-875c-ef126d21415d (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-11-19T06:35:32.250185+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-11-19T06:36:43.038053+00:00",
+      "description": "Update from feedback 0c2af80e-a9dd-4aba-9318-24d93ef07eea (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-11-19T06:36:43.063739+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-11-19T06:49:58.254420+00:00",
+      "description": "Update from feedback 9beebcef-267b-4522-bfa5-04fb26383329 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-11-19T06:49:58.298636+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-11-19T06:53:48.946283+00:00",
+      "description": "Update from feedback 9c6b5918-d402-4c17-b551-e0b52b9905f1 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-11-19T06:53:48.975710+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-11-19T08:13:48.448688+00:00",
+      "description": "Update from feedback c5267b70-61e5-4836-b23c-0f336ab609f9 (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-11-19T08:13:48.472050+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
+    }
+  ]
+}

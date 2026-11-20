@@ -1,0 +1,78 @@
+id: CMP-046
+name: Malicious-Insider Multi-Stage Campaign CMP-046
+description: 'Multi-stage operation by Malicious-Insider targeting legacy-srv. Stages
+  follow ATT&CK progression: initial_access -> credential_access -> privilege_escalation
+  -> discovery.'
+actor: Malicious-Insider
+targets:
+- host: legacy-srv
+  ip: 192.168.56.30
+techniques:
+- T1078
+- T1110.001
+- T1068
+- T1082
+tactic: kill_chain
+tactic_trajectory:
+- initial_access
+- credential_access
+- privilege_escalation
+- discovery
+steps:
+- step: 1
+  type: auth
+  description: 'INITIAL_ACCESS: Logon via compromised credentials from unusual external
+    address'
+  src_ip: 203.0.113.11
+  duration_seconds: 12
+  label: CMP-046_initial_access_valid_login
+  host: legacy-srv
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 2
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Targeted SSH password brute force targeting root
+    and service accounts'
+  src_ip: 203.0.113.11
+  duration_seconds: 54
+  label: CMP-046_cred_access_ssh_bruteforce
+  host: legacy-srv
+  user: root
+  attempts: 16
+  outcome: failure
+- step: 3
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Local privilege escalation via kernel vulnerability
+    exploit'
+  src_ip: 203.0.113.11
+  duration_seconds: 19
+  label: CMP-046_priv_esc_local_exploit
+  host: legacy-srv
+  user: guest
+  attempts: 1
+  outcome: success
+  command: ./priv_escalate_cve --target=root
+- step: 4
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-046_benign_health_check
+  host: legacy-srv
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 5
+  type: auth
+  description: 'DISCOVERY: Reconnaissance of OS build, hardware architecture and patch
+    level'
+  src_ip: 203.0.113.11
+  duration_seconds: 11
+  label: CMP-046_discovery_sys_info
+  host: legacy-srv
+  user: admin
+  attempts: 1
+  outcome: success
+  command: uname -a && cat /etc/os-release && lscpu

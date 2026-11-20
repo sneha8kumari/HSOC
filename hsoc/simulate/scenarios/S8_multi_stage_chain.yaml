@@ -1,0 +1,51 @@
+id: S8
+name: "Full Multi-stage APT Kill Chain"
+description: "End-to-end attack progression from reconnaissance to privilege escalation"
+targets:
+  - host: db-srv-01
+    ip: 192.168.56.20
+techniques:
+  - T1046
+  - T1110.001
+  - T1078
+  - T1548.003
+tactic: kill_chain
+steps:
+  - step: 1
+    type: flow
+    description: "Reconnaissance: SYN port scan"
+    src_ip: "{{attacker_ip}}"
+    dst_ips: ["192.168.56.20"]
+    dst_ports: "20-100"
+    duration_seconds: 30
+    label: apt_recon
+  - step: 2
+    type: auth
+    description: "Credential Access: SSH password brute force"
+    src_ip: "{{attacker_ip}}"
+    host: db-srv-01
+    user: admin
+    attempts: 12
+    outcome: failure
+    duration_seconds: 40
+    label: apt_cred_access
+  - step: 3
+    type: auth
+    description: "Initial Access: Valid admin login"
+    src_ip: "{{attacker_ip}}"
+    host: db-srv-01
+    user: admin
+    attempts: 1
+    outcome: success
+    duration_seconds: 5
+    label: apt_initial_access
+  - step: 4
+    type: auth
+    description: "Privilege Escalation: sudo spawn root shell"
+    src_ip: "{{attacker_ip}}"
+    host: db-srv-01
+    user: admin
+    command: "/bin/bash"
+    outcome: success
+    duration_seconds: 10
+    label: apt_priv_esc

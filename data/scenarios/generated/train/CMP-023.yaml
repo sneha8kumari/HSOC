@@ -1,0 +1,108 @@
+id: CMP-023
+name: Malicious-Insider Multi-Stage Campaign CMP-023
+description: 'Multi-stage operation by Malicious-Insider targeting web-srv-01. Stages
+  follow ATT&CK progression: initial_access -> persistence -> privilege_escalation
+  -> credential_access -> lateral_movement.'
+actor: Malicious-Insider
+targets:
+- host: web-srv-01
+  ip: 192.168.56.15
+techniques:
+- T1078
+- T1053.003
+- T1548.003
+- T1110.003
+- T1021.002
+tactic: kill_chain
+tactic_trajectory:
+- initial_access
+- persistence
+- privilege_escalation
+- credential_access
+- lateral_movement
+steps:
+- step: 1
+  type: auth
+  description: 'INITIAL_ACCESS: Logon via compromised credentials from unusual external
+    address'
+  src_ip: 203.0.113.53
+  duration_seconds: 19
+  label: CMP-023_initial_access_valid_login
+  host: web-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+- step: 2
+  type: auth
+  description: '[Benign Noise] Scheduled DevOps maintenance health check'
+  src_ip: 192.168.56.41
+  duration_seconds: 5
+  label: CMP-023_benign_health_check
+  host: web-srv-01
+  user: devops_automation
+  attempts: 1
+  outcome: success
+  command: uptime && df -h
+- step: 3
+  type: auth
+  description: 'PERSISTENCE: Cron job modification for persistent execution callback'
+  src_ip: 203.0.113.53
+  duration_seconds: 13
+  label: CMP-023_persistence_cron_task
+  host: web-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+  command: crontab -l | { cat; echo '*/30 * * * * /tmp/.svc'; } | crontab -
+- step: 4
+  type: auth
+  description: 'PRIVILEGE_ESCALATION: Abuse of NOPASSWD sudo privileges to spawn privileged
+    bash shell'
+  src_ip: 203.0.113.53
+  duration_seconds: 8
+  label: CMP-023_priv_esc_sudo_abuse
+  host: web-srv-01
+  user: admin
+  attempts: 1
+  outcome: success
+  command: sudo /bin/bash
+- step: 5
+  type: auth
+  description: 'CREDENTIAL_ACCESS: Horizontal password spray against multiple domain
+    users'
+  src_ip: 203.0.113.53
+  duration_seconds: 66
+  label: CMP-023_cred_access_pass_spray
+  host: web-srv-01
+  users:
+  - admin
+  - root
+  - dev_user
+  - ops_lead
+  - backup
+  attempts: 6
+  outcome: failure
+- step: 6
+  type: web
+  description: '[Benign Noise] Internal Prometheus metrics scraping query'
+  src_ip: 192.168.56.42
+  duration_seconds: 5
+  label: CMP-023_benign_metrics_scrape
+  host: web-srv-01
+  paths:
+  - /metrics
+  - /healthz
+  status_codes:
+  - 200
+  count: 4
+- step: 7
+  type: flow
+  description: 'LATERAL_MOVEMENT: SMB communication connecting to internal backup
+    share'
+  src_ip: 203.0.113.53
+  duration_seconds: 34
+  label: CMP-023_lateral_movement_smb_share
+  dst_ips:
+  - 192.168.56.15
+  dst_ports: '445'
+  packets_per_flow: 1
