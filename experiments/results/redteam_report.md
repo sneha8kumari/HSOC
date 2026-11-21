@@ -1,6 +1,6 @@
 # H-SOC GenAI Security Red-Team & Hallucination Audit Report
 
-**Generated**: 2026-11-19T08:13:48.943170+00:00  
+**Generated**: 2026-11-20T13:31:10.203952+00:00  
 **Evaluation Scope**: Prompt Injection Red-Teaming (35 test cases), Per-Provider Data Egress Redaction, Action Execution Guardrails, and Grounding/Hallucination Fidelity.
 
 ---

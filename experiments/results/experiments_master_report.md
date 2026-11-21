@@ -1,6 +1,6 @@
 # H-SOC Comprehensive Benchmark & Evaluation Report (E1–E6)
 
-**Evaluation Date**: `2026-10-27 06:08:45Z`  
+**Evaluation Date**: `2026-11-20 13:31:52Z`  
 **Environment**: Python 3.13 | SQLite | Matplotlib | FAISS | Ollama / Fallback Orchestrator  
 **Artifacts Generated**: `experiments/results/*.png` and `experiments/results/*.json`
 
@@ -10,17 +10,17 @@
 
 | Metric / Claim | Baseline Model | Proposed H-SOC Method | Absolute / Relative Gain | Primary Artifact |
 | :--- | :--- | :--- | :--- | :--- |
-| **Detection F1-Score** | Rules-Only (F1=0.1185) | **Hybrid Fusion (F1=0.1185)** | **+0.0% F1** | [e1_detection_metrics.png](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e1_detection_metrics.png) |
-| **Alert Reduction** | Raw Telemetry (0%) | **Dual-Signal Fusion (82.29%)** | **82.29% Compression** | [e1_detection_metrics.json](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e1_detection_metrics.json) |
-| **Correlation Incident Reduction** | Raw Alerts (0%) | **Graph Union-Find (92.71%)** | **92.71% Compression** | [e2_correlation_metrics.png](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e2_correlation_metrics.png) |
-| **Chain Reconstruction Purity** | Without Ignore-List (100.0%) | **Sanitized Entities (100.0%)** | **+0.0% Purity** | [e2_correlation_metrics.json](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e2_correlation_metrics.json) |
-| **Next-Tactic Top-3 Accuracy** | Unigram Prior (38.24%) | **2nd-Order Markov+Backoff (70.59%)** | **+32.4% Top-3** | [e3_forecasting_metrics.png](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e3_forecasting_metrics.png) |
-| **Forecasting Perplexity** | Unigram Prior (11.5467) | **2nd-Order Markov+Backoff (8.1431)** | **-58.4% Perplexity Reduction** | [e3_forecasting_metrics.json](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e3_forecasting_metrics.json) |
-| **Knowledge Retrieval MRR** | Dense Only (MRR=0.955) | **Hybrid + Cross-Encoder (1.000)** | **+0.045 MRR (1.000 Ideal)** | [e4_rag_retrieval_metrics.png](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e4_rag_retrieval_metrics.png) |
-| **GenAI Report Faithfulness** | Single-Prompt (74.2%) | **Multi-Agent + Critic (98.6%)** | **+24.4% Grounding** | [e5_genai_quality.png](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e5_genai_quality.png) |
-| **Draft-07 Schema Validity** | Single-Prompt (68.0%) | **Multi-Agent + Critic (100.0%)** | **100% Strict Schema Pass** | [e5_genai_quality_metrics.json](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e5_genai_quality_metrics.json) |
-| **Prompt Injection ASR** | Unhardened LLM (57.14%) | **Defense-in-Depth (0.0%)** | **-57.1% ASR (0.0% Bypass)** | [e6_safety_and_feedback.png](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e6_safety_and_feedback.png) |
-| **Bayesian Active Learning** | Uncalibrated Tactic (9.1%) | **100 Feedback Corrections (81.2%)** | **+72.1% P(True)** | [e6_safety_metrics.json](file:///C:/Users/Utkarsh Dubey/.gemini/antigravity/HSOC/experiments/results/e6_safety_metrics.json) |
+| **Detection F1-Score** | Rules-Only (F1=0.1185) | **Hybrid Fusion (F1=0.1185)** | **+0.0% F1** | [e1_detection_metrics.png](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e1_detection_metrics.png) |
+| **Alert Reduction** | Raw Telemetry (0%) | **Dual-Signal Fusion (82.29%)** | **82.29% Compression** | [e1_detection_metrics.json](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e1_detection_metrics.json) |
+| **Correlation Incident Reduction** | Raw Alerts (0%) | **Graph Union-Find (92.71%)** | **92.71% Compression** | [e2_correlation_metrics.png](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e2_correlation_metrics.png) |
+| **Chain Reconstruction Purity** | Without Ignore-List (100.0%) | **Sanitized Entities (100.0%)** | **+0.0% Purity** | [e2_correlation_metrics.json](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e2_correlation_metrics.json) |
+| **Next-Tactic Top-3 Accuracy** | Unigram Prior (38.24%) | **2nd-Order Markov+Backoff (70.59%)** | **+32.4% Top-3** | [e3_forecasting_metrics.png](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e3_forecasting_metrics.png) |
+| **Forecasting Perplexity** | Unigram Prior (11.5467) | **2nd-Order Markov+Backoff (8.1431)** | **-58.4% Perplexity Reduction** | [e3_forecasting_metrics.json](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e3_forecasting_metrics.json) |
+| **Knowledge Retrieval MRR** | Dense Only (MRR=0.955) | **Hybrid + Cross-Encoder (1.000)** | **+0.045 MRR (1.000 Ideal)** | [e4_rag_retrieval_metrics.png](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e4_rag_retrieval_metrics.png) |
+| **GenAI Report Faithfulness** | Single-Prompt (74.2%) | **Multi-Agent + Critic (98.6%)** | **+24.4% Grounding** | [e5_genai_quality.png](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e5_genai_quality.png) |
+| **Draft-07 Schema Validity** | Single-Prompt (68.0%) | **Multi-Agent + Critic (100.0%)** | **100% Strict Schema Pass** | [e5_genai_quality_metrics.json](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e5_genai_quality_metrics.json) |
+| **Prompt Injection ASR** | Unhardened LLM (57.14%) | **Defense-in-Depth (0.0%)** | **-57.1% ASR (0.0% Bypass)** | [e6_safety_and_feedback.png](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e6_safety_and_feedback.png) |
+| **Bayesian Active Learning** | Uncalibrated Tactic (9.1%) | **100 Feedback Corrections (81.2%)** | **+72.1% P(True)** | [e6_safety_metrics.json](file:///C:/Users/sneha/Downloads/HSOC/HSOC/experiments/results/e6_safety_metrics.json) |
 
 ---
 

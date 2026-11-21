@@ -337,6 +337,21 @@
       "kl_divergence": 0.0,
       "file": "v1.json",
       "action": "rollback"
+    },
+    {
+      "version": 2,
+      "timestamp": "2026-11-20T13:31:09.631619+00:00",
+      "description": "Update from feedback fa95347e-ee55-41b1-93ca-2e5096d9b9eb (rejected)",
+      "kl_divergence": 0.0,
+      "file": "v2.json"
+    },
+    {
+      "version": 1,
+      "timestamp": "2026-11-20T13:31:09.657612+00:00",
+      "description": "Rollback to v1 from v2",
+      "kl_divergence": 0.0,
+      "file": "v1.json",
+      "action": "rollback"
     }
   ]
 }

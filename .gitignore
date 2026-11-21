@@ -33,3 +33,7 @@ Thumbs.db
 # Experiments results (generated, not committed)
 experiments/results/*/metrics.json
 experiments/results/*/plots/
+
+.venv/
+venv/
+
