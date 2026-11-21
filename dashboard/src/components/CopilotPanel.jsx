@@ -338,9 +338,9 @@ export default function CopilotPanel({ incident, onRefreshIncident, onOpenChunk,
         style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', backgroundColor: 'var(--surface-panel)' }}
       >
         {[
-          { id: 'chat', label: 'Case briefing', icon: <Bot size={13} /> },
-          { id: 'whatif', label: 'What-if simulation', icon: <Sliders size={13} /> },
-          { id: 'feedback', label: 'Analyst feedback', icon: <Edit3 size={13} /> },
+          { id: 'chat', label: 'Case Briefing', icon: <Bot size={13} />, activeColor: '#a855f7' },
+          { id: 'whatif', label: 'What-If Simulation', icon: <Sliders size={13} />, activeColor: '#00f0ff' },
+          { id: 'feedback', label: 'Active Learning', icon: <Edit3 size={13} />, activeColor: '#10b981' },
         ].map((t) => {
           const isActive = activeTab === t.id;
           return (
@@ -352,21 +352,22 @@ export default function CopilotPanel({ incident, onRefreshIncident, onOpenChunk,
               onClick={() => setActiveTab(t.id)}
               style={{
                 flex: 1,
-                padding: '10px 6px',
-                backgroundColor: isActive ? 'var(--surface-subtle)' : 'transparent',
+                padding: '11px 6px',
+                backgroundColor: isActive ? 'rgba(30, 41, 59, 0.6)' : 'transparent',
                 border: 'none',
-                borderBottom: isActive ? '2px solid var(--border-focus)' : '2px solid transparent',
-                color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                fontWeight: isActive ? 600 : 400,
+                borderBottom: isActive ? `2px solid ${t.activeColor}` : '2px solid transparent',
+                color: isActive ? '#ffffff' : '#94a3b8',
+                fontWeight: isActive ? 700 : 500,
                 fontSize: '11.5px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
                 cursor: 'pointer',
+                transition: 'all 0.15s ease',
               }}
             >
-              {t.icon}
+              <span style={{ color: isActive ? t.activeColor : '#64748b' }}>{t.icon}</span>
               <span>{t.label}</span>
             </button>
           );
@@ -429,19 +430,21 @@ export default function CopilotPanel({ incident, onRefreshIncident, onOpenChunk,
                 <div
                   key={idx}
                   style={{
-                    backgroundColor: isUser ? 'var(--surface-active)' : 'var(--surface-subtle)',
-                    border: '1px solid var(--border-default)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '10px 12px',
+                    backgroundColor: isUser ? 'rgba(56, 189, 248, 0.08)' : 'rgba(168, 85, 247, 0.08)',
+                    border: isUser ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(168, 85, 247, 0.3)',
+                    borderLeft: isUser ? '3px solid #38bdf8' : '3px solid #a855f7',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
                     fontSize: '12.5px',
-                    lineHeight: '1.5',
+                    lineHeight: '1.6',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '10.5px', color: 'var(--text-muted)' }}>
-                    <span style={{ fontWeight: 600, color: isUser ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                      {isUser ? 'Analyst inquiry' : 'Assistant synthesis'}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '11px' }}>
+                    <span style={{ fontWeight: 700, color: isUser ? '#38bdf8' : '#c084fc', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      {isUser ? 'Analyst Query' : 'AI Copilot Synthesis'}
                     </span>
-                    <span>{msg.timestamp}</span>
+                    <span style={{ color: '#64748b', fontSize: '10px', fontFamily: 'var(--font-mono)' }}>{msg.timestamp}</span>
                   </div>
 
                   <div style={{ color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>

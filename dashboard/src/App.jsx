@@ -23,6 +23,8 @@ import CaseView from './components/CaseView';
 import CopilotPanel from './components/CopilotPanel';
 import CitationModal from './components/CitationModal';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
+import TopNav from './components/TopNav';
+import OverviewMetrics from './components/OverviewMetrics';
 
 export default function App() {
   const [incidents, setIncidents] = useState([]);
@@ -398,320 +400,30 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      {/* ── Calm Top Header Bar ── */}
-      <header
-        role="banner"
-        style={{
-          height: '44px',
-          backgroundColor: 'var(--surface-panel)',
-          borderBottom: '1px solid var(--border-default)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
-          flexShrink: 0,
-        }}
-      >
-        {/* Left: Product Name */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '24px',
-              height: '24px',
-              backgroundColor: 'var(--surface-subtle)',
-              border: '1px solid var(--border-strong)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            <ShieldAlert size={14} style={{ color: 'var(--text-primary)' }} />
-          </div>
-          <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)' }}>
-            H-SOC
-          </span>
-          <span style={{ color: 'var(--border-strong)' }}>|</span>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            Security Operations Console
-          </span>
-        </div>
+      {/* ── Top Navigation Bar ── */}
+      <TopNav
+        streamStatus={streamStatus}
+        onToggleStream={handleToggleStream}
+        onSetSpeed={handleSetSpeed}
+        onInjectAttack={handleInjectAttack}
+        telemetryHealth={telemetryHealth}
+        collectingWindows={collectingWindows}
+        onCollectWindows={handleCollectWindows}
+        density={density}
+        onToggleDensity={toggleDensity}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        isCopilotOpen={isCopilotOpen}
+        onToggleCopilot={() => setIsCopilotOpen((prev) => !prev)}
+      />
 
-        {/* Center: Live Stream Controls Toolbar */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '2px 8px',
-            backgroundColor: 'var(--surface-subtle)',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border-default)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
-            <span
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: streamStatus.running ? 'var(--state-success)' : 'var(--state-warning)',
-              }}
-            />
-            <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
-              {streamStatus.running ? 'Live' : 'Paused'}:
-            </span>
-            <span style={{ color: 'var(--text-secondary)' }}>
-              {streamStatus.current_scenario_name || 'MITRE Multi-stage S1–S8'}
-            </span>
-          </div>
-
-          <button
-            onClick={handleToggleStream}
-            title={streamStatus.running ? 'Pause real-time stream' : 'Resume real-time stream'}
-            aria-label={streamStatus.running ? 'Pause stream' : 'Resume stream'}
-            className="btn-secondary"
-            style={{ padding: '2px 6px', fontSize: '10.5px' }}
-          >
-            {streamStatus.running ? <Pause size={10} /> : <Play size={10} />}
-            <span>{streamStatus.running ? 'Pause' : 'Play'}</span>
-          </button>
-
-          <div style={{ display: 'flex', gap: '2px' }}>
-            {[1, 5, 10].map((s) => (
-              <button
-                key={s}
-                onClick={() => handleSetSpeed(s)}
-                className="btn-secondary"
-                aria-label={`Set speed to ${s}x`}
-                style={{
-                  padding: '2px 5px',
-                  fontSize: '10px',
-                  fontWeight: streamStatus.speed === s ? 600 : 400,
-                  backgroundColor: streamStatus.speed === s ? 'var(--surface-active)' : 'transparent',
-                  color: streamStatus.speed === s ? 'var(--text-primary)' : 'var(--text-muted)',
-                  borderColor: streamStatus.speed === s ? 'var(--border-strong)' : 'transparent',
-                }}
-              >
-                {s}x
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={handleInjectAttack}
-            title="Inject an immediate attack scenario stage"
-            aria-label="Inject attack step"
-            className="btn-secondary"
-            style={{ padding: '2px 7px', fontSize: '10.5px', color: 'var(--severity-high-text)' }}
-          >
-            <Zap size={10} />
-            <span>Inject step</span>
-          </button>
-        </div>
-
-        {/* Right: AI Local Status + Density Toggle + Theme Toggle + Shortcuts + Assistant Drawer Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Real Telemetry AI indicator */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-secondary)' }}>
-            <span
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: telemetryHealth.components?.ai_copilot?.status === 'ok' ? 'var(--state-success)' : 'var(--state-warning)',
-              }}
-            />
-            <span style={{ fontWeight: 500 }}>
-              AI: {telemetryHealth.components?.ai_copilot?.provider === 'ollama' ? 'Ollama Local' : telemetryHealth.components?.ai_copilot?.provider === 'mistral' ? 'Mistral' : 'Hybrid RAG'}
-            </span>
-          </div>
-
-          <span style={{ color: 'var(--border-subtle)' }}>|</span>
-
-          {/* Density Toggle (Comfortable vs Compact) */}
-          <button
-            onClick={toggleDensity}
-            title={`Toggle density (Shortcut: d). Currently ${density}.`}
-            aria-label={`Display density: currently ${density}`}
-            className="btn-secondary"
-            style={{ padding: '3px 8px', fontSize: '11px' }}
-          >
-            <SlidersHorizontal size={12} />
-            <span style={{ textTransform: 'capitalize' }}>{density}</span>
-          </button>
-
-          {/* Theme Toggle Button */}
-          <button
-            onClick={toggleTheme}
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode (Shortcut: t)`}
-            aria-label={`Toggle theme: currently ${theme}`}
-            className="btn-secondary"
-            style={{ padding: '3px 8px', fontSize: '11px' }}
-          >
-            {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
-            <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
-          </button>
-
-          {/* Keyboard Shortcuts Guide Button */}
-          <button
-            onClick={() => setIsShortcutsOpen(true)}
-            title="Keyboard shortcuts cheat sheet (Shortcut: ?)"
-            aria-label="Open keyboard shortcuts cheat sheet"
-            className="btn-secondary"
-            style={{ padding: '3px 8px', fontSize: '11px' }}
-          >
-            <Keyboard size={12} />
-            <span>Keys (?)</span>
-          </button>
-
-          {/* Assistant Sidebar Toggle */}
-          <button
-            onClick={() => setIsCopilotOpen(!isCopilotOpen)}
-            title="Toggle Copilot drawer (Shortcut: c)"
-            aria-label={isCopilotOpen ? 'Hide assistant sidebar' : 'Show assistant sidebar'}
-            aria-expanded={isCopilotOpen}
-            className="btn-secondary"
-            style={{
-              padding: '3px 8px',
-              fontSize: '11px',
-              backgroundColor: isCopilotOpen ? 'var(--surface-subtle)' : 'transparent',
-              color: isCopilotOpen ? 'var(--text-primary)' : 'var(--text-secondary)',
-            }}
-          >
-            <Bot size={12} />
-            <span>{isCopilotOpen ? 'Hide assistant' : 'Show assistant'}</span>
-          </button>
-        </div>
-      </header>
-
-      {/* ── Real-Time Telemetry & Health Subheader ── */}
-      <div
-        style={{
-          height: '32px',
-          backgroundColor: 'var(--surface-subtle)',
-          borderBottom: '1px solid var(--border-subtle)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
-          fontSize: '11px',
-          color: 'var(--text-secondary)',
-          flexShrink: 0,
-        }}
-      >
-        {/* Telemetry Sources Health Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          {/* Windows Laptop Telemetry Source */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Laptop size={13} style={{ color: 'var(--text-primary)' }} />
-            <span>Windows Host:</span>
-            <span
-              style={{
-                fontSize: '10px',
-                padding: '1px 5px',
-                borderRadius: 'var(--radius-sm)',
-                backgroundColor: 'var(--surface-active)',
-                color: 'var(--state-success-text)',
-                fontWeight: 600,
-              }}
-            >
-              {telemetryHealth.components?.windows_collector?.status === 'ok' ? 'ACTIVE' : 'READY'}
-            </span>
-            <button
-              onClick={handleCollectWindows}
-              disabled={collectingWindows}
-              title="Collect immediate snapshot of Windows Event Logs & active network connections"
-              className="btn-secondary"
-              style={{ padding: '1px 6px', fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
-            >
-              <RefreshCw size={9} className={collectingWindows ? 'spin' : ''} />
-              <span>{collectingWindows ? 'Reading...' : 'Collect Host'}</span>
-            </button>
-          </div>
-
-          <span style={{ color: 'var(--border-strong)' }}>|</span>
-
-          {/* Wazuh Telemetry Source */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Server size={13} style={{ color: 'var(--text-primary)' }} />
-            <span>Wazuh:</span>
-            <span
-              style={{
-                fontSize: '10px',
-                padding: '1px 5px',
-                borderRadius: 'var(--radius-sm)',
-                backgroundColor: 'var(--surface-active)',
-                color: telemetryHealth.components?.wazuh_integration?.status === 'ok' ? 'var(--state-success-text)' : 'var(--text-muted)',
-                fontWeight: 600,
-              }}
-            >
-              {telemetryHealth.components?.wazuh_integration?.status === 'ok' ? 'CONNECTED' : 'WEBHOOK ACTIVE'}
-            </span>
-          </div>
-
-          <span style={{ color: 'var(--border-strong)' }}>|</span>
-
-          {/* Stream CEP Pipeline Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Radio size={13} style={{ color: 'var(--border-focus)' }} />
-            <span>Live Stream Bus:</span>
-            <span style={{ color: 'var(--state-success-text)', fontWeight: 500 }}>
-              {telemetryHealth.components?.streaming_pipeline?.status === 'ok' ? 'STREAMING' : 'IDLE'}
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Live Telemetry vs Demo Filter Scope */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: '10.5px' }}>Scope:</span>
-          <div style={{ display: 'flex', gap: '2px', backgroundColor: 'var(--surface-panel)', padding: '2px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }}>
-            {[
-              { id: 'all', label: 'All Telemetry' },
-              { id: 'live', label: 'Live Host Only' },
-              { id: 'simulated', label: 'Demo / Sim' },
-            ].map((f) => {
-              const isSelected = telemetryFilter === f.id;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setTelemetryFilter(f.id)}
-                  style={{
-                    padding: '1px 7px',
-                    fontSize: '10.5px',
-                    fontWeight: isSelected ? 600 : 400,
-                    backgroundColor: isSelected ? 'var(--surface-active)' : 'transparent',
-                    color: isSelected ? 'var(--text-primary)' : 'var(--text-muted)',
-                    border: 'none',
-                    borderRadius: '2px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {lastLiveEvent && (
-            <div
-              style={{
-                maxWidth: '280px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                color: 'var(--text-muted)',
-                fontSize: '10.5px',
-                paddingLeft: '6px',
-                borderLeft: '1px solid var(--border-subtle)',
-              }}
-              title={lastLiveEvent.summary || lastLiveEvent.type}
-            >
-              Live: <span style={{ color: 'var(--text-primary)' }}>{lastLiveEvent.summary || lastLiveEvent.event_type || lastLiveEvent.type}</span>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* ── Modern Overview Metrics ── */}
+      <OverviewMetrics
+        incidents={incidents}
+        streamStatus={streamStatus}
+        telemetryHealth={telemetryHealth}
+      />
 
       {/* ── 3-Column Layout: Queue (Left) -> Case (Center) -> Assistant (Right) ── */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>

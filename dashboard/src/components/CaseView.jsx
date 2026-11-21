@@ -13,7 +13,8 @@ import {
   Activity,
   FileText,
   GitBranch,
-  Cpu
+  Cpu,
+  Network
 } from 'lucide-react';
 import { getHumanReadableTitle, getAffectedAsset, getTimeAgo, SEVERITY_CONFIG } from '../utils/incidentHelpers';
 import MarkovPanel from './MarkovPanel';
@@ -258,30 +259,32 @@ export default function CaseView({
       {/* ── Case Header ── */}
       <div
         style={{
-          padding: '14px 20px',
+          padding: '16px 22px',
           backgroundColor: 'var(--surface-panel)',
           borderBottom: '1px solid var(--border-default)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px',
+          gap: '12px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                   backgroundColor: sev.bg,
                   color: sev.text,
                   border: `1px solid ${sev.color}`,
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '2px 7px',
+                  borderRadius: '6px',
+                  padding: '3px 9px',
                   fontSize: '11px',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   textTransform: 'uppercase',
+                  letterSpacing: '0.4px',
+                  boxShadow: `0 0 10px ${sev.bg}`,
                 }}
               >
                 <span>{sev.symbol}</span>
@@ -291,10 +294,10 @@ export default function CaseView({
               {detail.is_simulated ? (
                 <span
                   style={{
-                    backgroundColor: 'var(--surface-active)',
-                    color: 'var(--text-muted)',
+                    backgroundColor: 'rgba(51, 65, 85, 0.4)',
+                    color: '#94a3b8',
                     border: '1px solid var(--border-default)',
-                    borderRadius: 'var(--radius-sm)',
+                    borderRadius: '4px',
                     padding: '2px 7px',
                     fontSize: '10.5px',
                     fontWeight: 600,
@@ -306,29 +309,29 @@ export default function CaseView({
               ) : (
                 <span
                   style={{
-                    backgroundColor: 'var(--state-success-bg)',
-                    color: 'var(--state-success-text)',
-                    border: '1px solid var(--state-success)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '2px 7px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    color: '#34d399',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    borderRadius: '4px',
+                    padding: '2px 8px',
                     fontSize: '10.5px',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '5px',
                   }}
                   title="This case was detected from live Windows host or Wazuh telemetry"
                 >
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: 'var(--state-success)' }} />
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
                   AUTHENTIC HOST TELEMETRY
                 </span>
               )}
 
               <h1
                 style={{
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
+                  fontSize: '17px',
+                  fontWeight: 700,
+                  color: '#ffffff',
                   margin: 0,
                   lineHeight: '1.3',
                 }}
@@ -343,14 +346,14 @@ export default function CaseView({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '14px',
-                fontSize: '11.5px',
+                fontSize: '12px',
                 color: 'var(--text-muted)',
-                marginTop: '6px',
+                marginTop: '8px',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span>ID:</span>
-                <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>
+                <span className="font-mono text-cyan" style={{ fontWeight: 600 }}>
                   {detail.incident_id}
                 </span>
                 <button
@@ -370,11 +373,34 @@ export default function CaseView({
                 </button>
               </div>
 
-              <span>Target: <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontWeight: 500 }}>{asset}</strong></span>
-              <span>Risk score: <strong className="font-mono" style={{ color: sev.text }}>{detail.risk_score}</strong></span>
-              <span>Status: <strong style={{ color: 'var(--text-primary)', textTransform: 'capitalize' }}>{detail.status || 'Open'}</strong></span>
+              <span>Target: <strong style={{ color: '#38bdf8', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{asset}</strong></span>
+              <span>Domain: <strong style={{ color: '#c084fc', textTransform: 'capitalize' }}>{detail.domain?.replace(/_/g, ' ') || 'General'}</strong></span>
+              <span>Status: <strong style={{ color: '#ffffff', textTransform: 'capitalize' }}>{detail.status || 'Open'}</strong></span>
               <span>Updated: {getTimeAgo(detail.updated_at || detail.created_at)}</span>
             </div>
+          </div>
+
+          {/* Prominent Risk Score Gauge Badge */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              background: `linear-gradient(135deg, ${sev.bg} 0%, rgba(15, 23, 42, 0.8) 100%)`,
+              border: `1px solid ${sev.color}`,
+              boxShadow: `0 0 14px ${sev.bg}`,
+              minWidth: '85px',
+            }}
+          >
+            <span style={{ fontSize: '9.5px', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+              RISK SCORE
+            </span>
+            <span className="font-mono" style={{ fontSize: '22px', fontWeight: 800, color: sev.text }}>
+              {detail.risk_score}
+            </span>
           </div>
         </div>
 
@@ -382,16 +408,17 @@ export default function CaseView({
         <div
           role="tablist"
           aria-label="Case investigation views"
-          style={{ display: 'flex', gap: '2px', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px', marginTop: '4px' }}
+          style={{ display: 'flex', gap: '6px', borderTop: '1px solid var(--border-default)', paddingTop: '10px', marginTop: '2px' }}
         >
           {[
-            { id: 'timeline', label: 'Attack timeline', count: timeline.length },
-            { id: 'forecast', label: 'Attack forecasting' },
-            { id: 'report', label: 'Investigation report' },
-            { id: 'relationships', label: 'Relationships', count: nodeCount },
-            { id: 'traces', label: 'Execution log' },
+            { id: 'timeline', label: 'Attack Timeline', count: timeline.length, icon: Activity, iconColor: '#00f0ff' },
+            { id: 'forecast', label: 'Markov Forecasting', icon: GitBranch, iconColor: '#a855f7' },
+            { id: 'report', label: 'Investigation Report', icon: FileText, iconColor: '#eab308' },
+            { id: 'relationships', label: 'Attack Graph', count: nodeCount, icon: Network, iconColor: '#ec4899' },
+            { id: 'traces', label: 'Execution Log', icon: Cpu, iconColor: '#10b981' },
           ].map((tab) => {
             const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
@@ -401,31 +428,34 @@ export default function CaseView({
                 id={`tab-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: '6px 12px',
+                  padding: '7px 14px',
                   fontSize: '12px',
-                  fontWeight: isActive ? 600 : 400,
-                  backgroundColor: isActive ? 'var(--surface-subtle)' : 'transparent',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 700 : 500,
+                  backgroundColor: isActive ? 'rgba(56, 189, 248, 0.12)' : 'rgba(30, 41, 59, 0.4)',
+                  color: isActive ? '#ffffff' : '#94a3b8',
                   border: '1px solid',
-                  borderColor: isActive ? 'var(--border-strong)' : 'transparent',
-                  borderRadius: 'var(--radius-sm)',
+                  borderColor: isActive ? 'rgba(56, 189, 248, 0.45)' : 'rgba(51, 65, 85, 0.35)',
+                  borderRadius: '6px',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
-                  transition: 'background-color 0.1s ease',
+                  gap: '7px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: isActive ? '0 0 10px rgba(56, 189, 248, 0.2)' : 'none',
                 }}
               >
-                {tab.label}
+                <Icon size={14} style={{ color: isActive ? tab.iconColor : '#64748b' }} />
+                <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span
                     className="font-mono"
                     style={{
                       fontSize: '10.5px',
-                      color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                      backgroundColor: isActive ? 'var(--surface-active)' : 'var(--surface-subtle)',
-                      padding: '0 4px',
-                      borderRadius: 'var(--radius-sm)',
+                      color: isActive ? '#38bdf8' : 'var(--text-muted)',
+                      backgroundColor: isActive ? 'rgba(56, 189, 248, 0.2)' : 'rgba(15, 23, 42, 0.6)',
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(56, 189, 248, 0.25)',
                     }}
                   >
                     {tab.count}
@@ -454,21 +484,22 @@ export default function CaseView({
         {/* ── Plain-Language Summary Box (Lead with what happened & what to do next) ── */}
         <div
           style={{
-            backgroundColor: 'var(--surface-panel)',
-            border: '1px solid var(--border-default)',
-            borderLeft: `3px solid ${sev.color}`,
-            borderRadius: 'var(--radius-sm)',
-            padding: 'var(--density-banner-pad, 12px 16px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(56, 189, 248, 0.25)',
+            borderLeft: `4px solid ${sev.color}`,
+            borderRadius: '10px',
+            padding: '16px 20px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '10px',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
           }}
         >
           <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>
-              Summary & recommended action
+            <div style={{ fontSize: '11px', color: '#38bdf8', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.8px' }}>
+              EXECUTIVE INCIDENT SUMMARY & RESPONSE
             </div>
-            <p style={{ fontSize: '13px', color: 'var(--text-primary)', marginTop: '4px', lineHeight: '1.5' }}>
+            <p style={{ fontSize: '13.5px', color: '#f1f5f9', marginTop: '6px', lineHeight: '1.6' }}>
               {summaryText}
             </p>
           </div>
@@ -477,36 +508,59 @@ export default function CaseView({
             role="status"
             aria-live="polite"
             style={{
-              paddingTop: '8px',
-              borderTop: '1px solid var(--border-subtle)',
+              paddingTop: '12px',
+              borderTop: '1px solid rgba(51, 65, 85, 0.5)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: '12px',
-              fontSize: '12px',
+              gap: '14px',
+              fontSize: '12.5px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-              <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Next action:</span>
-              <span style={{ color: 'var(--text-primary)' }}>{recommendedAction}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#94a3b8', fontWeight: 600 }}>Recommended SOAR Action:</span>
+              <span style={{ color: '#ffffff', fontWeight: 500, backgroundColor: 'rgba(30, 41, 59, 0.6)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                {recommendedAction}
+              </span>
             </div>
 
-            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
               <button
                 onClick={handleApprove}
                 aria-label="Approve recommended remediation step (Shortcut: a)"
-                className="btn-success"
-                style={{ padding: '2px 8px', fontSize: '11px' }}
+                style={{
+                  padding: '5px 14px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  backgroundColor: actionStatus === 'approved' ? '#059669' : '#10b981',
+                  color: '#ffffff',
+                  border: '1px solid #10b981',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)',
+                }}
               >
-                {actionStatus === 'approved' ? '? Approved' : 'Approve step'}
+                <Check size={13} />
+                <span>{actionStatus === 'approved' ? 'Action Approved' : 'Approve Action'}</span>
               </button>
               <button
                 onClick={handleReject}
                 aria-label="Reject recommended remediation step (Shortcut: r)"
-                className="btn-danger"
-                style={{ padding: '2px 8px', fontSize: '11px' }}
+                style={{
+                  padding: '5px 12px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  backgroundColor: 'rgba(244, 63, 94, 0.15)',
+                  color: '#fda4af',
+                  border: '1px solid rgba(244, 63, 94, 0.4)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                }}
               >
-                {actionStatus === 'rejected' ? '? Rejected' : 'Reject'}
+                <span>{actionStatus === 'rejected' ? 'Rejected' : 'Reject'}</span>
               </button>
             </div>
           </div>

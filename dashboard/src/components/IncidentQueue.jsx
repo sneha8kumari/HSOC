@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, ShieldAlert, Check } from 'lucide-react';
+import { Search, ShieldAlert, Check } from 'lucide-react';
 import { getHumanReadableTitle, getAffectedAsset, getTimeAgo, SEVERITY_CONFIG } from '../utils/incidentHelpers';
 import { QueueSkeleton } from './SkeletonLoader';
 
@@ -39,15 +39,57 @@ export default function IncidentQueue({
         if (rankB !== rankA) return rankB - rankA;
         return (b.risk_score || 0) - (a.risk_score || 0);
       });
-  }, [incidents, severityFilter, statusFilter, search]);
+  }, [incidents, severityFilter, statusFilter, search, telemetryFilter]);
+
+  const getSeverityGlow = (sev) => {
+    switch (sev) {
+      case 'critical':
+        return {
+          border: '1px solid rgba(244, 63, 94, 0.45)',
+          leftBorder: '4px solid #f43f5e',
+          badgeBg: 'rgba(244, 63, 94, 0.2)',
+          badgeText: '#ff8899',
+          scoreBg: 'rgba(244, 63, 94, 0.25)',
+          scoreText: '#fda4af',
+        };
+      case 'high':
+        return {
+          border: '1px solid rgba(249, 115, 22, 0.4)',
+          leftBorder: '4px solid #f97316',
+          badgeBg: 'rgba(249, 115, 22, 0.2)',
+          badgeText: '#fb923c',
+          scoreBg: 'rgba(249, 115, 22, 0.25)',
+          scoreText: '#fed7aa',
+        };
+      case 'medium':
+        return {
+          border: '1px solid rgba(234, 179, 8, 0.35)',
+          leftBorder: '4px solid #eab308',
+          badgeBg: 'rgba(234, 179, 8, 0.2)',
+          badgeText: '#fde047',
+          scoreBg: 'rgba(234, 179, 8, 0.2)',
+          scoreText: '#fef08a',
+        };
+      case 'low':
+      default:
+        return {
+          border: '1px solid rgba(16, 185, 129, 0.35)',
+          leftBorder: '4px solid #10b981',
+          badgeBg: 'rgba(16, 185, 129, 0.2)',
+          badgeText: '#34d399',
+          scoreBg: 'rgba(16, 185, 129, 0.2)',
+          scoreText: '#a7f3d0',
+        };
+    }
+  };
 
   return (
     <aside
       aria-label="Incident triage panel"
       style={{
-        width: '340px',
-        minWidth: '300px',
-        maxWidth: '380px',
+        width: '360px',
+        minWidth: '320px',
+        maxWidth: '400px',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
@@ -55,56 +97,53 @@ export default function IncidentQueue({
         borderRight: '1px solid var(--border-default)',
       }}
     >
-      {/* ── Queue Header & Counters ── */}
+      {/* ── Queue Header & Search ── */}
       <div
         style={{
-          padding: '12px 14px',
+          padding: '14px 16px',
           borderBottom: '1px solid var(--border-subtle)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
+          gap: '12px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)' }}>
-              Open incidents
+            <span style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--text-primary)', letterSpacing: '0.3px' }}>
+              INCIDENT QUEUE
             </span>
             <span
               className="font-mono"
-              aria-live="polite"
-              aria-atomic="true"
               style={{
                 fontSize: '11px',
-                color: 'var(--text-muted)',
-                backgroundColor: 'var(--surface-subtle)',
-                padding: '1px 6px',
-                borderRadius: 'var(--radius-sm)',
+                fontWeight: 600,
+                color: '#38bdf8',
+                backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                padding: '2px 7px',
+                borderRadius: '10px',
               }}
             >
               {loading ? '...' : filteredIncidents.length}
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Sort:</span>
-            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-              Severity
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: 'var(--text-muted)' }}>
+            <span>Rank:</span>
+            <span style={{ color: '#38bdf8', fontWeight: 600 }}>Risk Score</span>
           </div>
         </div>
 
         {/* ── Search Input ── */}
         <div style={{ position: 'relative' }}>
           <Search
-            size={13}
-            aria-hidden="true"
+            size={14}
             style={{
               position: 'absolute',
-              left: '9px',
+              left: '10px',
               top: '50%',
               transform: 'translateY(-50%)',
-              color: 'var(--text-muted)',
+              color: '#64748b',
             }}
           />
           <input
@@ -112,14 +151,14 @@ export default function IncidentQueue({
             className="input-text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title, host, IP or ID..."
-            aria-label="Filter incidents by title, host, IP or ID"
+            placeholder="Search host, IP, attack type..."
             style={{
               width: '100%',
-              paddingLeft: '28px',
-              paddingTop: '5px',
-              paddingBottom: '5px',
+              paddingLeft: '32px',
+              paddingTop: '7px',
+              paddingBottom: '7px',
               fontSize: '12px',
+              backgroundColor: 'rgba(15, 23, 42, 0.7)',
             }}
           />
         </div>
@@ -129,27 +168,33 @@ export default function IncidentQueue({
           {['all', 'critical', 'high', 'medium', 'low'].map((sev) => {
             const isSelected = severityFilter === sev;
             const cfg = SEVERITY_CONFIG[sev];
+            let activeColor = '#00f0ff';
+            let activeBg = 'rgba(0, 240, 255, 0.15)';
+            if (sev === 'critical') { activeColor = '#f43f5e'; activeBg = 'rgba(244, 63, 94, 0.2)'; }
+            else if (sev === 'high') { activeColor = '#f97316'; activeBg = 'rgba(249, 115, 22, 0.2)'; }
+            else if (sev === 'medium') { activeColor = '#eab308'; activeBg = 'rgba(234, 179, 8, 0.2)'; }
+            else if (sev === 'low') { activeColor = '#10b981'; activeBg = 'rgba(16, 185, 129, 0.2)'; }
+
             return (
               <button
                 key={sev}
                 onClick={() => setSeverityFilter(sev)}
-                aria-pressed={isSelected}
-                aria-label={`Filter by severity ${sev}`}
                 style={{
                   flex: 1,
-                  padding: '3px 0',
+                  padding: '4px 0',
                   fontSize: '11px',
-                  fontWeight: isSelected ? 600 : 400,
-                  backgroundColor: isSelected ? 'var(--surface-active)' : 'transparent',
-                  color: isSelected ? (cfg ? cfg.text : 'var(--text-primary)') : 'var(--text-muted)',
-                  border: isSelected ? '1px solid var(--border-strong)' : '1px solid transparent',
-                  borderRadius: 'var(--radius-sm)',
+                  fontWeight: isSelected ? 700 : 500,
+                  backgroundColor: isSelected ? activeBg : 'rgba(30, 41, 59, 0.4)',
+                  color: isSelected ? activeColor : '#94a3b8',
+                  border: isSelected ? `1px solid ${activeColor}` : '1px solid rgba(51, 65, 85, 0.4)',
+                  borderRadius: '6px',
                   cursor: 'pointer',
                   textTransform: 'capitalize',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '3px',
+                  gap: '4px',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 {cfg && <span style={{ fontSize: '8px' }}>{cfg.symbol}</span>}
@@ -160,32 +205,33 @@ export default function IncidentQueue({
         </div>
       </div>
 
-      {/* ── Incident Rows List (Supports Loading Skeleton) ── */}
+      {/* ── Incident Cards List ── */}
       <div
         role="feed"
         aria-label="Incident Queue"
         style={{
           flex: 1,
           overflowY: 'auto',
+          padding: '10px 0',
           display: 'flex',
           flexDirection: 'column',
+          gap: '8px',
         }}
       >
         {loading ? (
-          <QueueSkeleton count={6} />
+          <QueueSkeleton count={5} />
         ) : filteredIncidents.length === 0 ? (
-          <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: '13px' }}>No matching incidents found</p>
-            <p style={{ fontSize: '11px', marginTop: '4px' }}>Try clearing filters or search term</p>
+          <div style={{ padding: '36px 16px', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: '13px', fontWeight: 500 }}>No matching incidents</p>
+            <p style={{ fontSize: '11.5px', marginTop: '4px', color: '#64748b' }}>Try clearing filters or search term</p>
           </div>
         ) : (
           filteredIncidents.map((inc) => {
             const isSelected = inc.incident_id === selectedIncidentId;
-            const sev = SEVERITY_CONFIG[inc.severity] || SEVERITY_CONFIG.medium;
+            const sevStyles = getSeverityGlow(inc.severity);
             const title = getHumanReadableTitle(inc);
             const asset = getAffectedAsset(inc);
             const timeAgo = getTimeAgo(inc.updated_at || inc.created_at);
-
             const tacticWord = inc.tactics && inc.tactics.length > 0 ? inc.tactics[0].replace(/_/g, ' ') : null;
 
             return (
@@ -194,7 +240,7 @@ export default function IncidentQueue({
                 role="article"
                 aria-selected={isSelected}
                 tabIndex={0}
-                className="queue-row"
+                className={`queue-card ${isSelected ? 'selected' : ''}`}
                 onClick={() => onSelectIncident(inc.incident_id)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
@@ -203,32 +249,19 @@ export default function IncidentQueue({
                   }
                 }}
                 style={{
-                  position: 'relative',
-                  padding: 'var(--density-queue-pad, 9px 12px 9px 14px)',
-                  cursor: 'pointer',
-                  backgroundColor: isSelected ? 'var(--surface-selected)' : 'transparent',
-                  borderBottom: '1px solid var(--border-subtle)',
-                  borderLeft: isSelected ? `3px solid ${sev.color}` : '3px solid transparent',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 'var(--density-queue-gap, 3px)',
-                  transition: 'background-color 0.1s ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                  borderLeft: sevStyles.leftBorder,
+                  borderColor: isSelected ? 'var(--accent-cyan)' : undefined,
+                  boxShadow: isSelected ? '0 0 12px rgba(0, 240, 255, 0.2)' : undefined,
                 }}
               >
-                {/* Line 1: Title and Risk score */}
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
+                {/* Header Row: Title & Risk Score */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
                   <div
                     style={{
-                      fontSize: 'var(--density-title-size, 12.5px)',
-                      fontWeight: isSelected ? 600 : 500,
-                      color: 'var(--text-primary)',
-                      lineHeight: '1.3',
+                      fontSize: '12.5px',
+                      fontWeight: isSelected ? 700 : 600,
+                      color: isSelected ? '#ffffff' : '#f1f5f9',
+                      lineHeight: '1.35',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -239,92 +272,128 @@ export default function IncidentQueue({
                     {title}
                   </div>
 
+                  {/* Risk Score Pill */}
                   <div
                     className="font-mono"
                     style={{
                       fontSize: '11.5px',
-                      fontWeight: 600,
-                      color: inc.risk_score >= 70 ? 'var(--severity-critical-text)' : inc.risk_score >= 50 ? 'var(--severity-high-text)' : 'var(--text-secondary)',
+                      fontWeight: 700,
+                      padding: '2px 7px',
+                      borderRadius: '6px',
+                      backgroundColor: sevStyles.scoreBg,
+                      color: sevStyles.scoreText,
+                      border: `1px solid ${sevStyles.badgeText}40`,
                       flexShrink: 0,
                     }}
-                    title={`Risk score: ${inc.risk_score}`}
+                    title={`Risk Score: ${inc.risk_score}/100`}
                   >
                     {inc.risk_score}
                   </div>
                 </div>
 
-                {/* Line 2: Asset, Tactic as plain words, Time */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 'var(--density-meta-size, 11px)', color: 'var(--text-muted)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                    <span style={{ color: sev.text, fontWeight: 600, fontSize: '9px' }}>
-                      {sev.symbol}
-                    </span>
-                    <span style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>
-                      {asset}
-                    </span>
-                    {tacticWord && (
-                      <>
-                        <span style={{ color: 'var(--border-strong)' }}>·</span>
-                        <span style={{ textTransform: 'capitalize', color: 'var(--text-secondary)' }}>
-                          {tacticWord}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                {/* Tags Row: Asset & Tactic */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  {/* Severity Badge */}
+                  <span
+                    style={{
+                      fontSize: '9.5px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      backgroundColor: sevStyles.badgeBg,
+                      color: sevStyles.badgeText,
+                      letterSpacing: '0.4px',
+                    }}
+                  >
+                    {inc.severity}
+                  </span>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0, marginLeft: '6px' }}>
+                  {/* Asset Chip */}
+                  <span
+                    style={{
+                      fontSize: '10.5px',
+                      fontFamily: 'var(--font-mono)',
+                      color: '#38bdf8',
+                      backgroundColor: 'rgba(56, 189, 248, 0.12)',
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(56, 189, 248, 0.25)',
+                    }}
+                  >
+                    {asset}
+                  </span>
+
+                  {/* Tactic Chip */}
+                  {tacticWord && (
+                    <span
+                      style={{
+                        fontSize: '10.5px',
+                        textTransform: 'capitalize',
+                        color: '#c084fc',
+                        backgroundColor: 'rgba(168, 85, 247, 0.12)',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        border: '1px solid rgba(168, 85, 247, 0.25)',
+                      }}
+                    >
+                      {tacticWord}
+                    </span>
+                  )}
+                </div>
+
+                {/* Footer Row: Timestamp & Source */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '10.5px', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {inc.is_simulated ? (
                       <span
                         style={{
-                          backgroundColor: 'var(--surface-active)',
-                          color: 'var(--text-muted)',
-                          fontSize: '8.5px',
+                          backgroundColor: 'rgba(51, 65, 85, 0.5)',
+                          color: '#94a3b8',
+                          fontSize: '9px',
                           fontWeight: 600,
-                          padding: '0 4px',
-                          borderRadius: '2px',
-                          border: '1px solid var(--border-default)',
+                          padding: '1px 5px',
+                          borderRadius: '3px',
                         }}
-                        title="Simulated demo scenario"
                       >
-                        DEMO
+                        SIMULATED
                       </span>
                     ) : (
                       <span
                         style={{
-                          backgroundColor: 'var(--state-success-bg)',
-                          color: 'var(--state-success-text)',
-                          fontSize: '8.5px',
-                          fontWeight: 600,
-                          padding: '0 4px',
-                          borderRadius: '2px',
-                          border: '1px solid var(--state-success)',
+                          backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                          color: '#34d399',
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '3px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '2px',
+                          gap: '3px',
                         }}
-                        title="Real telemetry from host or Wazuh"
                       >
-                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'var(--state-success)' }} />
-                        HOST
+                        <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                        LIVE HOST
                       </span>
                     )}
 
                     {liveIncidentId === inc.incident_id && (
                       <span
                         style={{
-                          backgroundColor: 'var(--severity-high-bg)',
-                          color: 'var(--severity-high-text)',
-                          fontSize: '8.5px',
-                          fontWeight: 600,
-                          padding: '0 4px',
-                          borderRadius: '2px',
+                          backgroundColor: 'rgba(249, 115, 22, 0.2)',
+                          color: '#fb923c',
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '3px',
                         }}
                       >
-                        STREAM
+                        STREAMING
                       </span>
                     )}
-                    <span>{timeAgo}</span>
                   </div>
+
+                  <span>{timeAgo}</span>
                 </div>
               </div>
             );
@@ -335,37 +404,33 @@ export default function IncidentQueue({
       {/* ── Footer Keyboard Tips ── */}
       <div
         style={{
-          padding: '8px 12px',
+          padding: '10px 14px',
           borderTop: '1px solid var(--border-subtle)',
-          fontSize: '10.5px',
-          color: 'var(--text-muted)',
+          fontSize: '11px',
+          color: '#64748b',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          backgroundColor: 'rgba(10, 15, 26, 0.6)',
         }}
       >
         <div style={{ display: 'flex', gap: '8px' }}>
-          <span><kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 4px', background: 'var(--surface-subtle)', borderRadius: '2px' }}>j</kbd>/<kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 4px', background: 'var(--surface-subtle)', borderRadius: '2px' }}>k</kbd></span>
-          <span><kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 4px', background: 'var(--surface-subtle)', borderRadius: '2px' }}>Enter</kbd></span>
+          <span><kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 5px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(51, 65, 85, 0.6)', borderRadius: '3px', color: '#cbd5e1' }}>j</kbd>/<kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 5px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(51, 65, 85, 0.6)', borderRadius: '3px', color: '#cbd5e1' }}>k</kbd> browse</span>
+          <span><kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 5px', background: 'rgba(30, 41, 59, 0.8)', border: '1px solid rgba(51, 65, 85, 0.6)', borderRadius: '3px', color: '#cbd5e1' }}>Enter</kbd> view</span>
         </div>
         {onOpenShortcuts && (
           <button
             onClick={onOpenShortcuts}
-            title="Open keyboard shortcuts (?)"
-            aria-label="Open keyboard shortcuts cheat sheet"
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--text-muted)',
-              fontSize: '10.5px',
+              color: '#38bdf8',
+              fontSize: '11px',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
+              fontWeight: 500,
             }}
           >
-            <kbd style={{ fontFamily: 'var(--font-mono)', padding: '1px 5px', background: 'var(--surface-subtle)', borderRadius: '2px', color: 'var(--text-secondary)' }}>?</kbd>
-            <span>Shortcuts</span>
+            Help (?)
           </button>
         )}
       </div>
